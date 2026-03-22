@@ -1,6 +1,5 @@
-﻿using LIB.ViewModels;
-using System;
-using System.Collections.Generic;
+﻿using LIB.DTOs.User;
+using LIB.ViewModels;
 
 namespace LIB.Models;
 
@@ -37,5 +36,26 @@ public partial class User
         } catch(Exception) {
             throw;
         }
+    }
+
+    public User(CreateUserRequest dto, Role role) {
+        if(String.IsNullOrWhiteSpace(dto.Name)) throw new Exception("El nombre del usuario no es válido");
+        if(String.IsNullOrWhiteSpace(dto.Email)) throw new Exception("El email del usuario no es válido");
+        if(String.IsNullOrWhiteSpace(dto.Password)) throw new Exception("La contraseña del usuario no es válida");
+
+        this.Name = dto.Name;
+        this.Email = dto.Email;
+        this.Password = dto.Password;
+        this.RoleId = Role.RoleId;
+        this.Image = dto.Image;
+        this.Role = role;
+    }
+
+    public User(UserViewModel viewModel, Role role) {
+        this.Name = viewModel.Name;
+        this.Email = viewModel.Email;
+        this.RoleId = role.RoleId;
+        this.Role = role;
+        this.Image = viewModel.Image;
     }
 }

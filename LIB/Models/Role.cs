@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace LIB.Models;
+﻿namespace LIB.Models;
 
 public partial class Role
 {
