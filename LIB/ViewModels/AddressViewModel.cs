@@ -1,7 +1,7 @@
 ﻿using LIB.Models;
 using LIB.Enums;
 using System.ComponentModel.DataAnnotations;
-using LIB.DTOs;
+using LIB.DTOs.Address;
 
 namespace LIB.ViewModels
 {

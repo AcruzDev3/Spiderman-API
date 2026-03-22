@@ -1,8 +1,7 @@
-﻿using LIB.Interfaces;
-using LIB.Models;
+﻿using LIB.Models;
 using LIB.Enums;
 using System.ComponentModel.DataAnnotations;
-using LIB.DTOs;
+using LIB.DTOs.Crime;
 
 namespace LIB.ViewModels
 {
@@ -33,6 +32,9 @@ namespace LIB.ViewModels
 
         [Required(ErrorMessage = "No puede haber un crimen sin criminales")]
         List<CriminalViewModel> Criminals = new List<CriminalViewModel>();
+
+        [Required(ErrorMessage = "No puede haber un crimen sin heroes")]
+        List<UserViewModel> Users = new List<UserViewModel>();
         public CrimeViewModel(Crime model) {
             try {
                 if (model == null) throw new Exception("El crimen no puede ser nulo");
@@ -45,23 +47,15 @@ namespace LIB.ViewModels
                 this.Start = model.DateStart;
                 this.Status = model.Status;
                 this.End = model?.DateEnd;
+                this.Criminals = model.Criminals.Select(c => new CriminalViewModel(c)).ToList();
+                this.Users = model.Heroes.Select(h => new UserViewModel(h)).ToList();
             } catch(Exception) {
                 throw;
             }
         }
 
-        public CrimeViewModel(CreateCrimeRequest dto, AddressViewModel address, CrimeGrade grade, CrimeType type, List<CriminalViewModel> criminals) {
-            
-            if(address == null) throw new Exception("La dirección no es válida");
-            if(grade == null) throw new Exception("El grado del crimen no es válido");
-            if(type == null) throw new Exception("El tipo del crimen no es válido");
-            if(criminals == null || criminals.Count == 0) throw new Exception("El crimen debe tener al menos un criminal asociado");
-
-            this.Address = address;
-            this.Grade = grade.Name;
-            this.Type = type.Name;
+        public CrimeViewModel(CreateCrimeRequest dto) {
             this.Description = dto.Description;
-            this.Criminals = criminals;
         }
     }
 }

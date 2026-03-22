@@ -1,4 +1,4 @@
-﻿using LIB.DTOs;
+﻿using LIB.DTOs.User;
 using LIB.Models;
 using System.ComponentModel.DataAnnotations;
 
@@ -50,6 +50,20 @@ namespace LIB.ViewModels
                 this.Email = dto.Email;
                 this.Role = dto.Role;
                 this.Image = dto.Image;
+            } catch (Exception) {
+                throw;
+            }
+        }
+
+        public UserViewModel(UpdateUserRequest dto) {
+            try {
+                if (dto == null) throw new Exception("El DTO del usuario no puede ser nulo");
+                this.Id = dto.Id;
+                this.Name = dto.Name;
+                this.Email = dto.Email;
+                this.Role = dto.Role;
+                this.Image = dto.Image;
+
             } catch (Exception) {
                 throw;
             }

@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using API.DTOs;
+using LIB.DTOs.Criminal;
 using LIB.Models;
 
 namespace LIB.ViewModels
