@@ -1,21 +1,23 @@
-﻿using LIB.Interfaces;
-using LIB.Models;
+﻿using LIB.Models;
 using LIB.ViewModels;
-using Microsoft.EntityFrameworkCore;
-using LIB.DTOs;
+using LIB.Interfaces.IManagers;
+using LIB.Interfaces.IRepositories;
+using LIB.DTOs.Crime;
 
 namespace LIB.Managers
 {
-    public class CrimeManager : IManager<CrimeViewModel, CreateCrimeRequest, Crime>
+    public class CrimeManager : ICrimeManager
     {
-        private readonly SpidermanContext _context;
-        private readonly AddressManager _addressManager;
-        private readonly CriminalManager _criminalManager;
-        public CrimeManager(SpidermanContext context, AddressManager addressManager, CriminalManager criminalManager)
+        private readonly ICrimeRepository _crimeRepository;
+        private readonly  ICriminalRepository _criminalRepository;
+        private readonly  IUserRepository _userRepository;
+        private readonly  IAddressRepository _addressRepository;
+        public CrimeManager(ICrimeRepository crimeRepository, ICriminalRepository criminalRepository, IUserRepository userRepository, IAddressRepository addressRepository)
         {
-            this._context = context;
-            this._addressManager = addressManager;
-            this._criminalManager = criminalManager;
+            this._crimeRepository = crimeRepository;
+            this._criminalRepository = criminalRepository;
+            this._userRepository = userRepository;
+            this._addressRepository = addressRepository;
         }
 
         public async Task<CrimeViewModel> GetById(int id)
@@ -23,7 +25,7 @@ namespace LIB.Managers
             CrimeViewModel? viewModel = null;
             try {
 
-                Crime? model = await this.GetModel(id);
+                Crime? model = await this._crimeRepository.GetById(id);
                 if(model == null) throw new Exception("No se pudo encontrar el crimen");
                 viewModel = new CrimeViewModel(model);
             }
@@ -37,7 +39,7 @@ namespace LIB.Managers
             List<CrimeViewModel> viewModels = new List<CrimeViewModel>();
             try
             {
-                List<Crime>?  models = await this.GetAllModels();
+                List<Crime>?  models = await this._crimeRepository.GetAll();
 
                 if(models == null) throw new Exception("No se han podido obtener los crimenes");
 
@@ -54,31 +56,31 @@ namespace LIB.Managers
         {
             try
             {
-                CrimeGrade? grade = await this.VerifyGradeCrime(dto.GradeName);
+                if(dto == null) throw new Exception("El crimen no es válido");
+
+                CrimeGrade? grade = await this._crimeRepository.GetGradeByName(dto.GradeName);
                 if (grade == null) throw new Exception("El grado del crimen no es válido");
 
-                CrimeType? type = await this.VerifyTypeCrime(dto.TypeName);
+                CrimeType? type = await this._crimeRepository.GetTypeByName(dto.TypeName);
                 if (type == null) throw new Exception("El tipo del crimen no es válido");
 
+                List<User>? users = await this._userRepository.GetByIds(dto.UserIds);
+                if(users == null) throw new Exception("El usuario no es válido");
 
-                AddressViewModel addressViewModel = await this._addressManager.GetById(dto.AddressId);
-                if (addressViewModel == null) throw new Exception("La dirección no es válida");
+                List<Criminal>? criminals = await this._criminalRepository.GetByIds(dto.CriminalIds);
+                if (criminals == null) throw new Exception("Los criminales no son válidos");
 
-                List<CriminalViewModel> criminals = new List<CriminalViewModel>();
-                foreach(int id in dto.CriminalsIds) {
-                    CriminalViewModel? criminalViewModel = await this._criminalManager.GetById(id);
-                    if(criminalViewModel == null) throw new Exception("El criminal con id " + id + " no es válido");
-                    else criminals.Add(criminalViewModel);
-                }
-                
-                CrimeViewModel viewModel = new CrimeViewModel(dto, addressViewModel, grade, type, criminals);
+                Address? address = await this._addressRepository.GetById(dto.AddressId);
+                if (address == null) throw new Exception("La dirección no es válida");
+
+                CrimeViewModel viewModel = new CrimeViewModel(dto);
                 if(viewModel == null) throw new Exception("El crimen no es válido");
 
-                Crime? model = new Crime(viewModel, grade, type, addressViewModel);
+                Crime? model = new Crime(users, criminals, dto.Description, grade, type, address);
                 if(model == null) throw new Exception("El crimen no es válido");
 
-                await this._context.Crimes.AddAsync(model);
-                int rowsAffected = await this._context.SaveChangesAsync();
+                await this._crimeRepository.Add(model);
+                int rowsAffected = await this._crimeRepository.SaveChanges();
                 if (rowsAffected != 1) throw new Exception("No se pudo crear el crimen");
             }
             catch (Exception)
@@ -87,21 +89,37 @@ namespace LIB.Managers
             }
         }
 
+        public async Task Update(UpdateCrimeRequest dto) {
+            try {
+                if(dto == null) throw new Exception("El crimen no es válido");
+
+                Crime? model = await this._crimeRepository.GetById(dto.Id);
+                if(model == null) throw new Exception("El crimen no existe");
+
+                this._crimeRepository.Update(model);
+                int rowsAffected = await this._crimeRepository.SaveChanges();
+
+                if (rowsAffected != 1) throw new Exception("No se pudo actualizar el crimen");
+            } catch(Exception) {
+                throw;
+            }
+        }
         public async Task Delete(int id)
         {
             try
             {
-                if(id < 1) throw new Exception("El crimen no es válido");
-                Crime? crime = await this.GetModel(id);
+                Crime? crime = await this._crimeRepository.GetById(id);
                 if (crime == null) throw new Exception("El crimen no existe");
 
-                AddressViewModel? address = await this._addressManager.GetById(crime.AddressId);
+                Address? address = await this._addressRepository.GetById(crime.AddressId);
                 if (address == null) throw new Exception("La dirección asociada al crimen no existe");
 
-                await this._addressManager.Delete(address.Id);
+                this._addressRepository.Delete(address);
+                await this._addressRepository.SaveChanges();
 
-                this._context.Crimes.Remove(crime);
-                int rowsAffected = await this._context.SaveChangesAsync();
+                this._crimeRepository.Delete(crime);
+
+                int rowsAffected = await this._crimeRepository.SaveChanges();
                 if(rowsAffected != 1) throw new Exception("No se pudo eliminar el crimen");
             }
             catch (Exception)
@@ -110,55 +128,20 @@ namespace LIB.Managers
             }
         }
         
-        public async Task<int> DeleteAllCrimesAssociatedWhithId(int id)
-        {
-            int rowsAffected = -1;
-            try
-            {
-                this._context.Crimes.RemoveRange(_context.Crimes.Where(c => c.Criminals.Any(cr => cr.CriminalId == id)));
-            }
-            catch(Exception)
-            {
-                throw;
-            }
-            return rowsAffected;
-        }
-        public async Task<Crime?> Exists(CrimeViewModel viewModel)
-        {
-            try
-            {
-                if (viewModel == null) throw new Exception("El modelo vista del crimen no es válido");
-
-                return await this._context.Crimes
-                    .FirstOrDefaultAsync(m =>
-                        m.Grade.Name.Equals(viewModel.Grade, StringComparison.CurrentCultureIgnoreCase) &&
-                        m.Type.Name.Equals(viewModel.Type, StringComparison.CurrentCultureIgnoreCase) &&
-                        m.DateStart == viewModel.Start &&
-                        m.DateEnd == viewModel.End &&
-                        m.Status == viewModel.Status &&
-                        m.AddressId == viewModel.Address.Id
-                    );
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public async Task<int> Solved(int idCrime)
         {
             int rowsAffected = 0;
             try
             {
                 if (idCrime <= 0) return 0;
-                Crime? crime = await GetModel(idCrime);
+                Crime? crime = await this._crimeRepository.GetById(idCrime);
                 if (crime == null) throw new Exception("No se pudo encontrar el crimen");
 
                 crime.Status = true;
                 crime.DateEnd = DateTime.Now;
 
-                this._context.Crimes.Update(crime);
-                rowsAffected = await this._context.SaveChangesAsync();
+                this._crimeRepository.Update(crime);
+                rowsAffected = await this._crimeRepository.SaveChanges();
                 if(rowsAffected != 1) throw new Exception("No se pudo actualizar el crimen");
             }
             catch (Exception)
@@ -166,48 +149,6 @@ namespace LIB.Managers
                 throw;
             }
             return rowsAffected;
-        }
-
-        private async Task<CrimeGrade> VerifyGradeCrime(string gradeName)
-        {
-            CrimeGrade? model = null;
-            try
-            {
-                model = await this._context.CrimeGrades
-                    .FirstOrDefaultAsync(m => m.Name.Equals(gradeName, StringComparison.CurrentCultureIgnoreCase));
-                if (model == null) throw new Exception("El grado del crimen no es válido");
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            return model;
-        }
-
-        private async Task<CrimeType> VerifyTypeCrime(string typeName)
-        {
-            CrimeType? model = null;
-            try
-            {
-                model = await this._context.CrimeTypes.AsNoTracking()
-                    .FirstOrDefaultAsync(m => m.Name.Equals(typeName, StringComparison.CurrentCultureIgnoreCase));
-                if (model == null) throw new Exception("El tipo del crimen no es válido");
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            return model;
-        }
-
-        private async Task<Crime?> GetModel(int id)
-        {
-            if (id <= 0) return null;
-            return await this._context.Crimes.AsNoTracking().FirstOrDefaultAsync(c => c.CrimeId == id);
-        }
-        private async Task<List<Crime>> GetAllModels()
-        {
-            return await this._context.Crimes.AsNoTracking().ToListAsync();
         }
     }
 }

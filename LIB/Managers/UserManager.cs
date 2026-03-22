@@ -1,143 +1,119 @@
-﻿using API.DTOs;
-using LIB.DTOs;
-using LIB.Interfaces;
+﻿using LIB.DTOs.User;
+using LIB.Interfaces.IManagers;
+using LIB.Interfaces.IRepositories;
 using LIB.Models;
 using LIB.ViewModels;
-using Microsoft.EntityFrameworkCore;
 
 namespace LIB.Managers
 {
-    public class UserManager : IManager<UserViewModel, CreateUserRequest, User>
+    public class UserManager : IUserManager
     {
-        private readonly SpidermanContext _context;
-        private readonly CrimeManager _crimeManager;
-        public UserManager(SpidermanContext context, CrimeManager crimeManager)
-        {
-            this._context = context;
-            this._crimeManager = crimeManager;
+        private readonly IUserRepository _userRepository;
+        private readonly ICrimeRepository _crimeRepository;
+        public UserManager(IUserRepository userRepository, ICrimeRepository crimeRepository) {
+            this._userRepository = userRepository;
+            this._crimeRepository = crimeRepository;
         }
 
-        public async Task<UserViewModel> GetById(int id)
-        {
+        public async Task<UserViewModel> GetById(int id) {
             UserViewModel? viewModel = null;
             try {
-                if (id < 0) throw new Exception("El id del usuario no es válido");
-
-                User? model = await this._context.Users.FirstOrDefaultAsync(u => u.UserId == id);
+                User? model = await this._userRepository.GetById(id);
                 if (model == null) throw new Exception("El usuario no existe");
 
                 viewModel = new UserViewModel(model);
-            } catch(Exception) {
+            } catch (Exception) {
                 throw;
             }
             return viewModel;
         }
 
-        public async Task<List<UserViewModel>> GetAll()
-        {
+        public async Task<List<UserViewModel>> GetAll() {
             List<UserViewModel> viewModels = new List<UserViewModel>();
             try {
-                List<User>? models = await this.GetAllModels();
-                
-                if(models == null) throw new Exception("No se han podido obtener los usuarios");
-                
+                List<User>? models = await this._userRepository.GetAll();
+                if (models == null) throw new Exception("No se han podido obtener los usuarios");
+
                 foreach (User model in models) viewModels.Add(new UserViewModel(model));
-            }
-            catch (Exception) {
+
+            } catch (Exception) {
                 throw;
             }
             return viewModels;
         }
 
-        public async Task Create(CreateUserRequest dto)
-        {
-            try
-            {
-                Role? role = await this.VerifyRoleUser(dto.Role);
-                
+        public async Task Create(CreateUserRequest dto) {
+            try {
+                Role? role = await this._userRepository.GetRoleAsync(dto.Role);
                 if (role == null) throw new Exception("El rol del usuario no existe");
 
                 UserViewModel viewModel = new UserViewModel(dto);
+                if (await this._userRepository.Exists(new UserViewModel(dto)) != null) throw new Exception("El usuario ya existe");
 
-                if(await Exists(new UserViewModel(dto)) == null) throw new Exception("El usuario ya existe");
-
-
-                User? model = new User(viewModel, role, dto.Password);
+                User model = new User(dto, role);
                 if (model == null) throw new Exception("El usuario no es válido");
-               
-                await this._context.Users.AddAsync(model);
-                
-                int rowAffected = await this._context.SaveChangesAsync();
-                if (rowAffected != 1) throw new Exception("No se pudo crear el usuario");
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
 
-        public async Task Delete(int id)
-        {
-            try
-            {
-                if(id < 1) throw new Exception("El usuario no es válido");
+                await this._userRepository.Add(model);
 
-                User? model = await this.GetModel(id);
-                if(model == null) throw new Exception("El usuario no existe");
-
-                // Delete the crimes associated with the user
-                int rowsAffectedDeletedCrimes = await this._crimeManager.DeleteAllCrimesAssociatedWhithId(model.UserId);
-                if(rowsAffectedDeletedCrimes == -1) throw new Exception("No se pudieron eliminar los crímenes asociados al usuario");
-
-                this._context.Users.Remove(model);
-                int rowsAffected = await this._context.SaveChangesAsync();
-                if (rowsAffected != 1) throw new Exception("No se pudo eliminar el usuario");
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<User?> Exists(UserViewModel viewModel)
-        {
-            try
-            {
-                if (viewModel == null) throw new Exception("La vista modelo del usuario es nula");
-
-                return await this._context.Users.AsNoTracking()
-                    .FirstOrDefaultAsync(
-                        u => u.Name.Equals(viewModel.Name, StringComparison.CurrentCultureIgnoreCase) &&
-                        u.Email.Equals(viewModel.Email, StringComparison.CurrentCultureIgnoreCase) &&
-                        u.Role.Name.Equals(viewModel.Role, StringComparison.CurrentCultureIgnoreCase)
-                    );
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        private async Task<Role?> VerifyRoleUser(string roleName)
-        {
-            try {
-                return await this._context.Roles.FirstOrDefaultAsync(
-                    r => r.Name.Equals(roleName, StringComparison.CurrentCultureIgnoreCase)
-                );
+                int rowsAffected = await this._userRepository.SaveChanges();
+                if (rowsAffected != 1) throw new Exception("No se pudo crear el usuario");
             } catch (Exception) {
                 throw;
             }
         }
 
-        private async Task<User?> GetModel(int id)
-        {
-            return await this._context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == id);
+        public async Task Update(UpdateUserRequest dto) {
+            try {
+                if(dto == null) throw new Exception("El usuario no es válido");
+
+                User? user = await this._userRepository.GetById(dto.Id);
+                if(user == null) throw new Exception("El usuario no existe");
+
+                Role? role = await this._userRepository.GetRoleAsync(dto.Role);
+                if(role == null) throw new Exception("El rol del usuario no existe");
+
+                UserViewModel viewModel = new UserViewModel(dto);
+
+                User newUser = new User(viewModel, role);
+
+                this._userRepository.Update(newUser);
+                await this._userRepository.SaveChanges();
+            } catch(Exception) {
+                throw;
+            }
         }
 
-        private async Task<List<User>?> GetAllModels()
-        {
-            return await this._context.Users.AsNoTracking().ToListAsync();
+        public async Task ChangePassword() {
+            try {
+
+            } catch (Exception) {
+                throw;
+            }
         }
-        
+
+        public async Task Delete(int id) {
+            try {
+                User? user = await this._userRepository.GetById(id);
+                if (user == null) throw new Exception("El usuario no existe");
+
+                List<Crime>? crimes = await this._userRepository.GetCrimes(user);
+                
+                this._userRepository.Delete(user);
+                int rowsAffected = await this._userRepository.SaveChanges();
+
+                if (crimes == null) return;
+
+                List<Crime>? crimesWithoutHero = crimes
+                    .Where(c => c.Heroes.Any())
+                    .ToList();
+
+                if (crimesWithoutHero.Any()) {
+                    this._crimeRepository.DeleteRange(crimesWithoutHero);
+                    await this._crimeRepository.SaveChanges();
+                }
+            } catch (Exception) {
+                throw;
+            }
+        }
     }
 }

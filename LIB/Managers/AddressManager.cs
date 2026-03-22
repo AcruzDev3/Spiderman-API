@@ -1,17 +1,16 @@
-﻿using LIB.DTOs;
-using LIB.Enums;
-using LIB.Interfaces;
+﻿using LIB.DTOs.Address;
+using LIB.Interfaces.IManagers;
+using LIB.Interfaces.IRepositories;
 using LIB.Models;
 using LIB.ViewModels;
-using Microsoft.EntityFrameworkCore;
 namespace LIB.Managers
 {
-    public class AddressManager: IManager<AddressViewModel, CreateAddressRequest, Address>
+    public class AddressManager: IAddressManager
     {
-        private readonly SpidermanContext _context;
-        public AddressManager(SpidermanContext context)
+        private readonly IAddressRepository _addressRepository;
+        public AddressManager(IAddressRepository addressRepository)
         {
-            this._context = context;
+            this._addressRepository = addressRepository;
         }
 
         public async Task<AddressViewModel> GetById(int id)
@@ -19,7 +18,7 @@ namespace LIB.Managers
             AddressViewModel? addresViewModel = null;
             try
             {
-                Address? model = await this.GetModel(id);
+                Address? model = await this._addressRepository.GetById(id);
                 if (model == null) throw new Exception("No se pudo encontrar la direccion");
                 addresViewModel = new AddressViewModel(model);  
             }
@@ -34,7 +33,7 @@ namespace LIB.Managers
         {
             List<AddressViewModel> viewModels = new List<AddressViewModel>();
             try {
-                List<Address>? models = await this.GetAllModels();
+                List<Address>? models = await this._addressRepository.GetAll();
                 
                 if (models == null) throw new Exception("No se han podido obtener las direcciones");
                 
@@ -59,10 +58,9 @@ namespace LIB.Managers
                 Address model = new Address(viewModel);
                 if (model == null) throw new Exception("El modelo de la dirección no es válido");
 
-                await this._context.Addresses.AddAsync(model);
-                int rowsAffected = await this._context.SaveChangesAsync();
+                await this._addressRepository.Add(model);
+                int rowsAffected = await this._addressRepository.SaveChanges();
                 if (rowsAffected != 1) throw new Exception("No se ha podido crear la direccion");
-                
             }
             catch (Exception) 
             {
@@ -70,47 +68,38 @@ namespace LIB.Managers
             }
         }
 
+        public async Task Update(UpdateAddressRequest dto)
+        {
+            try
+            {
+                if(dto == null) throw new Exception("La dirección no es válida");
+                
+                Address? model = await this._addressRepository.GetById(dto.Id);
+                if(model == null) throw new Exception("La dirección no existe");
+
+                this._addressRepository.Update(model);
+                int rowsAffected = await this._addressRepository.SaveChanges();
+                
+                if (rowsAffected != 1) throw new Exception("No se ha podido actualizar la direccion");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public async Task Delete(int id)
         {
             try
             {
-                Address? model = await this.GetModel(id);
+                Address? model = await this._addressRepository.GetById(id);
                 if (model == null) throw new Exception("La direccion no existe");
 
-                this._context.Addresses.Remove(model);
+                this._addressRepository.Delete(model);
             }
             catch (Exception)
             {
                 throw;
             }
-        }
-
-        public async Task<Address?> Exists(AddressViewModel viewModel)
-        {
-            try
-            {
-                if (viewModel == null) throw new Exception("El modelo vista de la dirección no es válido");
-
-                 return await this._context.Addresses
-                    .FirstOrDefaultAsync(m => m.Street.Equals(viewModel.Street, StringComparison.CurrentCultureIgnoreCase) &&
-                    m.ZipCode.Equals(viewModel.ZipCode, StringComparison.CurrentCultureIgnoreCase) &&
-                    m.Side.Equals(viewModel.Side.ToString(), StringComparison.CurrentCultureIgnoreCase) &&
-                    m.Number == viewModel.Number
-                    );
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-        private async Task<Address?> GetModel(int id)
-        {
-            return await this._context.Addresses.FirstOrDefaultAsync(a => a.AddressId == id);
-        }
-
-        private async Task<List<Address>> GetAllModels()
-        {
-            return await this._context.Addresses.AsNoTracking().ToListAsync();
         }
     }
 }

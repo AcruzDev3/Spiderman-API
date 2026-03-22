@@ -1,26 +1,27 @@
-﻿using API.DTOs;
-using LIB.Interfaces;
+﻿using LIB.DTOs.Criminal;
+using LIB.Interfaces.IManagers;
+using LIB.Interfaces.IRepositories;
 using LIB.Models;
 using LIB.ViewModels;
-using Microsoft.EntityFrameworkCore;
 
 namespace LIB.Managers
 {
-    public class CriminalManager : IManager<CriminalViewModel, CreateCriminalRequest, Criminal>
+    public class CriminalManager : ICriminalManager
     {
-        private readonly SpidermanContext _context;
-        private readonly CrimeManager _crimeManager;
-        public CriminalManager(SpidermanContext context, CrimeManager crimeManager)
+        private readonly ICriminalRepository _criminalRepository;
+        private readonly ICrimeRepository _crimeRepository;
+        public CriminalManager(ICriminalRepository criminalRepository, ICrimeRepository _crimeRepository)
         {
-            _context = context;
-            _crimeManager = crimeManager;
+            this._criminalRepository = criminalRepository;
+            this._crimeRepository = _crimeRepository;
         }
+
         public async Task<CriminalViewModel> GetById(int id)
         {
             CriminalViewModel? viewModel = null;
             try
             {
-                Criminal? model = await this.GetModel(id);
+                Criminal? model = await this._criminalRepository.GetById(id);
 
                 if (model == null) throw new Exception("No se pudo encontrar el criminal");
 
@@ -38,7 +39,7 @@ namespace LIB.Managers
             List<CriminalViewModel> viewModels = new List<CriminalViewModel>();
             try
             {
-                List<Criminal>? models = await this.GetAllModels();
+                List<Criminal>? models = await this._criminalRepository.GetAll();
                 if (models == null) throw new Exception("No se han podido obtener los criminales");
 
                 foreach (Criminal model in models) viewModels.Add(new CriminalViewModel(model));
@@ -54,18 +55,18 @@ namespace LIB.Managers
         {
             try
             {
-                CriminalRiskLevel? riskLevel = await VerifyRiskCriminal(dto.Risk);
+                CriminalRiskLevel? riskLevel = await this._criminalRepository.GetCriminalRiskLevelAsync(dto.Risk);
                 if (riskLevel == null) throw new Exception("El nivel de riesgo no es válido");
 
                 CriminalViewModel viewModel = new CriminalViewModel(dto, riskLevel);
-                if(await this.Exists(viewModel) == null) throw new Exception("El criminal ya existe");
+                if(await this._criminalRepository.Exists(viewModel) == null) throw new Exception("El criminal ya existe");
 
                 Criminal? model = new Criminal(viewModel, riskLevel);
 
                 if(model == null) throw new Exception("No se pudo crear el criminal");
 
-                await _context.Criminals.AddAsync(model);
-                int rowsAffected = await this._context.SaveChangesAsync();
+                await this._criminalRepository.Add(model);
+                int rowsAffected = await this._criminalRepository.SaveChanges();
 
                 if(rowsAffected != 1) throw new Exception("No se pudo crear el criminal");
             }
@@ -75,66 +76,52 @@ namespace LIB.Managers
             }
         }
 
+        public async Task Update(UpdateCriminalRequest dto) {
+            try {
+                if(dto == null) throw new Exception("El criminal no es válido");
+
+                Criminal? model = await this._criminalRepository.GetById(dto.Id);
+                if(model == null) throw new Exception("El criminal no existe");
+
+                this._criminalRepository.Update(model);
+                int rowsAffected = await this._criminalRepository.SaveChanges();
+
+                if(rowsAffected != 1) throw new Exception("No se ha podido actualizar al criminal");
+
+            } catch(Exception) {
+                throw;
+            }
+        }
+
         public async Task Delete(int id)
         {
             try
-            {
-                if (id < 1) throw new Exception("El id del criminal no es válido");
-                
-                Criminal? criminal = await this.GetModel(id);
+            {   
+                Criminal? criminal = await this._criminalRepository.GetById(id);
                 if (criminal == null) throw new Exception("No se pudo encontrar el criminal");
 
-                int rowsDeleted = await this._crimeManager.DeleteAllCrimesAssociatedWhithId(id);
-                if (rowsDeleted < 0) throw new Exception("No se pudieron eliminar los crímenes asociados al criminal");
+                List<Crime>? crimes = await this._criminalRepository.GetCrimes(criminal);
+                
+                this._criminalRepository.Delete(criminal);
+                
+                int rowsAffected = await this._criminalRepository.SaveChanges();
+                if(rowsAffected != 1) throw new Exception("No se pudo eliminar el criminal");
 
-                this._context.Criminals.Remove(criminal);
-                int rowsAffected = await this._context.SaveChangesAsync();
 
-                if (rowsAffected != 1) throw new Exception("No se pudo eliminar el criminal");
+                if (crimes == null) return;
+                List<Crime>? crimesWithoutCriminals = crimes
+                    .Where(c => !c.Criminals.Any())
+                    .ToList();
+
+                if (crimesWithoutCriminals.Any()) {
+                    this._crimeRepository.DeleteRange(crimesWithoutCriminals);
+                    await this._criminalRepository.SaveChanges();
+                }
             }
             catch (Exception)
             {
                 throw;
             }
-        }
-
-        public async Task<Criminal?> Exists(CriminalViewModel viewModel)
-        {
-            if (viewModel == null) throw new Exception("El modelo de vista del criminal es nulo");
-            try
-            {
-                return await this._context.Criminals
-                    .FirstOrDefaultAsync(m => m.Name.Equals(viewModel.Name, StringComparison.CurrentCultureIgnoreCase) &&
-                        m.Risk.Name.Equals(viewModel.Risk, StringComparison.CurrentCultureIgnoreCase) &&
-                        m.CriminalSince == viewModel.Since
-                    );
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        private async Task<CriminalRiskLevel?> VerifyRiskCriminal(string riskName)
-        {
-            try
-            {
-                return await this._context.CriminalRiskLevels.FirstOrDefaultAsync(
-                    m => m.Name.Equals(riskName, StringComparison.CurrentCultureIgnoreCase)
-                );
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        private async Task<Criminal?> GetModel(int id) {
-            return await this._context.Criminals.FirstOrDefaultAsync(m => m.CriminalId == id);
-        }
-
-        private async Task<List<Criminal>?> GetAllModels() {
-            return await this._context.Criminals.ToListAsync();
         }
     }
 }
