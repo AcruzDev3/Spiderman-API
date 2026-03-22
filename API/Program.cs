@@ -1,6 +1,7 @@
+using LIB.Extensions;
 using LIB.Models;
-using LIB.Managers;
 using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -10,14 +11,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//builder.Services.AddDbContext<SpidermanContext>(options =>
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("DB_SPIDERMAN")));
+builder.Services.AddDbContext<SpidermanContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DB_SPIDERMAN")));
 
-builder.Services.AddScoped<CrimeManager>();
-builder.Services.AddScoped<AddressManager>();
-builder.Services.AddScoped<UserManager>();
-builder.Services.AddScoped<CriminalManager>();
-
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure();
 
 var app = builder.Build();
 
