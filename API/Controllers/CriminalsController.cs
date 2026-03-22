@@ -1,4 +1,4 @@
-﻿using API.DTOs;
+﻿using LIB.DTOs.Criminal;
 using LIB.Managers;
 using LIB.ViewModels;
 using Microsoft.AspNetCore.Http;
@@ -17,13 +17,11 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id) {
             CriminalViewModel? criminal = null;
-            try {
-                criminal = await _criminalManager.GetById(id);
-                if (criminal == null) throw new Exception("El criminal no existe");
-            } catch(Exception ex) {
-                return BadRequest(ex.Message);
-            }
-            return Ok();
+            
+            criminal = await _criminalManager.GetById(id);
+            if (criminal == null) return NotFound("El criminal no existe");
+
+            return Ok(criminal);
         }
 
         [HttpPost("Create")]
