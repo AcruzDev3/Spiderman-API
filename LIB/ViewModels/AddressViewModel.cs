@@ -7,12 +7,8 @@ namespace LIB.ViewModels
 {
     public class AddressViewModel
     {
-        [Required(ErrorMessage = "El id de la direccion es obligatorio")]
-        [Range(1, int.MaxValue, ErrorMessage = "El id de la vista de la dirección no es válido")]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "El número de la dirección es obligatorio")]
-        [Range(0, int.MaxValue, ErrorMessage = "El numero de la dirrecion no es válido")]
         public int Number { get; set; }
 
         [Required(ErrorMessage = "La parte es obligatorio")]
