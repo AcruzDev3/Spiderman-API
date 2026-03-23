@@ -1,8 +1,7 @@
 ﻿using LIB.Enums;
-using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
-namespace LIB.DTOs.Address
+namespace API.DTOs.Address
 {
     public class CreateAddressRequest
     {
