@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace API.DTOs {
+namespace API.Contracts.Requests {
     public class LogInRequest {
 
         [Required(ErrorMessage = "El correo electrónico es obligatorio")]

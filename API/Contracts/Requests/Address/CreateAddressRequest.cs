@@ -1,13 +1,10 @@
 ﻿using LIB.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace API.DTOs.Address
+namespace API.Contracts.Requests.Address
 {
-    public class UpdateAddressRequest
+    public class CreateAddressRequest
     {
-        [Required(ErrorMessage = "El id es obligatoria")]
-        public int Id { get; set; }
-
         [Required(ErrorMessage = "El número es obligatorio")]
         public int Number { get; set; }
 
@@ -21,9 +18,8 @@ namespace API.DTOs.Address
 
         [Required(ErrorMessage = "La calle es obligatoria")]
         [StringLength(150, ErrorMessage = "La longitud de la calle no puede ser mayor a 150 caracteres")]
-        public string Street { get; set; }
+        public string Street { get; set; }        
 
-        [Required(ErrorMessage = "La imagen es obligatoria")]
-        public IFormFile Image { get; set; }
+        public IFormFile? Image { get; set; }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using LIB.Validation;
 using System.ComponentModel.DataAnnotations;
 
-namespace API.DTOs.User
+namespace API.Contracts.Requests.User
 {
     public class UpdateUserPasswordRequest
     {
