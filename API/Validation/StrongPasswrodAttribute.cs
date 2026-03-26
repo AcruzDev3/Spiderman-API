@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LIB.Validation
+namespace API.Validation
 {
     public class StrongPasswrodAttribute : ValidationAttribute
     {
