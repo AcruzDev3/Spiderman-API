@@ -17,14 +17,14 @@ namespace Domain.Models
 
             if (String.IsNullOrEmpty(name)) throw new DomainValidationException("El nombre del nivel de peligrosidad del criminal no es válido");
             if (name.Length > 20) throw new DomainValidationException("El nombre del nivel de peligrosidad del crimen no puede ser mayor a 20 caracteres");
-            this._name = name;
+            this.Name = name;
         }
 
         // Constructor para crear un nivel de peligrosidad
         public CriminalRiskLevel(string name) {
             if (String.IsNullOrEmpty(name)) throw new DomainValidationException("El nombre del nivel de peligrosidad del criminal no es válido");
             if (name.Length > 20) throw new DomainValidationException("El nombre del nivel de peligrosidad del crimen no puede ser mayor a 20 caracteres");
-            this._name = name;
+            this.Name = name;
         }
     }
 }

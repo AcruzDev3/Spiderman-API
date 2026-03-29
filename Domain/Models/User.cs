@@ -20,47 +20,47 @@ namespace Domain.Models
         
         public User (int id, string name, string email, string password, Role role, string image) {
             if (id < 0) throw new DomainValidationException("El id del usuario no es válido");
-            this._id = id;
+            this.Id = id;
 
             if (String.IsNullOrEmpty(name)) throw new DomainValidationException("El nombre del usuario no es válido");
             if (name.Length > 50) throw new DomainValidationException("El nombre del usuario no puede ser mayor a 50 caracteres");
-            this._name = name;
+            this.Name = name;
 
             if (String.IsNullOrEmpty(email)) throw new DomainValidationException("El email del usuario no es válido");
             if (email.Length > 255) throw new DomainValidationException("El email del usuario no puede ser mayor a 255 caracteres");
-            this._email = email;
+            this.Email = email;
 
             if(String.IsNullOrEmpty(password)) throw new DomainValidationException("La contraseña del usuario no es válida");
             if(password.Length > 255) throw new DomainValidationException("La contraseña del usuario no puede ser mayor a 255 caracteres");
-            this._password = password;
+            this.Password = password;
 
             if (role == null) throw new DomainValidationException("El rol del usuario no es válido");
-            this._role = role;
+            this.Role = role;
 
             if (String.IsNullOrEmpty(image)) throw new DomainValidationException("La imagen del usuario no es válida");
             if (image.Length > 200) throw new DomainValidationException("La imagen no puede ser mayor a 300 caracteres");
-            this._image = image;
+            this.Image = image;
         }
 
         public User(string name, string email, string password, Role role, string image) {
             if (String.IsNullOrEmpty(name)) throw new DomainValidationException("El nombre del usuario no es válido");
             if (name.Length > 50) throw new DomainValidationException("El nombre del usuario no puede ser mayor a 50 caracteres");
-            this._name = name;
+            this.Name = name;
 
             if (String.IsNullOrEmpty(email)) throw new DomainValidationException("El email del usuario no es válido");
             if (email.Length > 255) throw new DomainValidationException("El email del usuario no puede ser mayor a 255 caracteres");
-            this._email = email;
+            this.Email = email;
 
             if (String.IsNullOrEmpty(password)) throw new DomainValidationException("La contraseña del usuario no es válida");
             if (password.Length > 255) throw new DomainValidationException("La contraseña del usuario no puede ser mayor a 255 caracteres");
-            this._password = password;
+            this.Password = password;
 
             if (role == null) throw new DomainValidationException("El rol del usuario no es válido");
-            this._role = role;
+            this.Role = role;
 
             if (String.IsNullOrEmpty(image)) throw new DomainValidationException("La imagen del usuario no es válida");
             if (image.Length > 200) throw new DomainValidationException("La imagen no puede ser mayor a 300 caracteres");
-            this._image = image;
+            this.Image = image;
         }
     }
 }
