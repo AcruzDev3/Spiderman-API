@@ -1,14 +1,13 @@
-﻿using LIB.DTOs.Criminal;
-using LIB.ViewModels;
+﻿using Domain.Models;
 
 namespace Application.Interfaces.Services
 {
     public interface ICriminalService
     {
-        Task<CriminalViewModel> GetById(int id);
-        Task<List<CriminalViewModel>> GetAll();
-        Task Create(CreateCriminalRequest dto);
-        Task Update(UpdateCriminalRequest dto);
+        Task<Criminal> GetById(int id);
+        Task<List<Criminal>> GetAll();
+        Task Create(Criminal model);
+        Task Update(Criminal model);
         Task Delete(int id);
     }
 }

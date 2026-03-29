@@ -1,14 +1,13 @@
-﻿using LIB.DTOs.User;
-using LIB.ViewModels;
+﻿using Domain.Models;
 
 namespace Application.Interfaces.Services
 {
     public interface IUserService
     {
-        Task<UserViewModel> GetById(int id);
-        Task<List<UserViewModel>> GetAll();
-        Task Create(CreateUserRequest dto);
-        Task Update(UpdateUserRequest dto);
+        Task<User> GetById(int id);
+        Task<List<User>> GetAll();
+        Task Create(User dto);
+        Task Update(User dto);
         Task Delete(int id);
     }
 }

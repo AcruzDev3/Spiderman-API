@@ -1,14 +1,13 @@
-﻿using LIB.DTOs.Address;
-using LIB.ViewModels;
+﻿using Domain.Models;
 
 namespace Application.Interfaces.Services
 {
     public interface IAddressService
     {
-        Task<AddressViewModel> GetById(int id);
-        Task<List<AddressViewModel>> GetAll();
-        Task Create(CreateAddressRequest dto);
-        Task Update(UpdateAddressRequest dto);
+        Task<Address> GetById(int id);
+        Task<List<Address>> GetAll();
+        Task Create(Address model);
+        Task Update(Address model);
         Task Delete(int id);
     }
 }
