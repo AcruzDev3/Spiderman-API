@@ -56,11 +56,46 @@ namespace Infrastructure.Repositories
             foreach (CrimeEntity entity in crimesEntities) {
                 List<Criminal> criminals = GetCriminalsOfCrime(entity.Criminals.ToList());
                 List<User> heroes = GetHeroesOfCrime(entity.Heroes.ToList());
-                Address addres = GetAddressOfCrime(entity.Address);
-                Crime crime = new Crime();
-                crime.
-                Crime crime = crimes.Add(CrimeMapper.ToDomain(entity, addres, criminals, heroes));
+                Address addres = AddressMapper.ToDomain(entity.Address);
+                CrimeGrade grade = CrimeGradeMapper.ToDomain(entity.Grade);
+                CrimeType type = CrimeTypeMapper.ToDomain(entity.Type);
+                
+                crimes.Add(CrimeMapper.ToDomain(entity, heroes, criminals, addres, grade, type));
             }
+
+            return crimes;
+        }
+
+        public async Task Add(User model) {
+            await this._context.Users.AddAsync(UserMapper.ToEntity(model));
+        }
+
+        public void Update(User model) {
+            this._context.Users.Update(UserMapper.ToEntity(model));
+        }
+
+        public void Delete(User model) {
+            this._context.Users.Remove(UserMapper.ToEntity(model));
+        }
+
+        public async Task<int> SaveChanges() {
+            return await this._context.SaveChangesAsync();
+        }
+
+        public async Task<User?> Exists(User model) {
+            UserEntity? entity = this._context.Users
+                .AsNoTracking()
+                .FirstOrDefault(u => u.Email.Equals(model.Email) &&
+                u.Name.Equals(model.Name) && u.Role.Name.Equals(model.Role));
+            Role? role = await GetRoleAsync(model.Role.Name);
+            return UserMapper.ToDomain(entity, role);
+        }
+
+        public async Task<Role?> GetRoleAsync(string? role) {
+            RoleEntity? entity = await _context.Roles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.Name.Equals(role, StringComparison.OrdinalIgnoreCase));
+            return RoleMapper.ToDomain(entity);
         }
 
         private List<Criminal> GetCriminalsOfCrime(List<CriminalEntity> criminalsEntities) {
@@ -81,39 +116,6 @@ namespace Infrastructure.Repositories
                 users.Add(UserMapper.ToDomain(user, role));
             }
             return users;
-        }
-
-        private Address GetAddressOfCrime(AddressEntity addressEntity) {
-            return AddressMapper.ToDomain(addressEntity);
-        }   
-
-        public async Task Add(User model) {
-            await this._context.Users.AddAsync(model);
-        }
-
-        public void Update(User model) {
-            this._context.Users.Update(model);
-        }
-
-        public void Delete(User model) {
-            this._context.Users.Remove(model);
-        }
-
-        public async Task<int> SaveChanges() {
-            return await this._context.SaveChangesAsync();
-        }
-
-        public async Task<UserEntity?> Exists(User model) {
-            return this._context.Users
-                .AsNoTracking()
-                .FirstOrDefault(u => u.Email.Equals(viewModel.Email) &&
-                u.Name.Equals(viewModel.Name) && u.Role.Name.Equals(viewModel.Role));
-        }
-
-        public async Task<Role?> GetRoleAsync(string? role) {
-            return await _context.Roles
-                .AsNoTracking()
-                .FirstOrDefaultAsync(r => r.Name.Equals(role, StringComparison.OrdinalIgnoreCase));
         }
     }
 }
