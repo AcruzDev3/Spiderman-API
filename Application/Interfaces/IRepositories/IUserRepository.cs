@@ -1,13 +1,14 @@
-﻿
+﻿using Domain.Models;
+
 namespace Application.Interfaces.IRepositories
 {
     public interface IUserRepository
     {
-        Task<UserEntity?> GetById(int id); 
+        Task<User?> GetById(int id); 
         Task<List<User>?> GetByIds(List<int> ids);
         Task<List<User>> GetAll();
         Task<List<Crime>?> GetCrimes(User model);
-        Task<User?> Exists(UserViewModel viewModel);
+        Task<User?> Exists(User viewModel);
         Task Add(User model);
         void Update(User model);
         void Delete(User model);

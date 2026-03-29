@@ -1,4 +1,4 @@
-﻿using LIB.DTOs.Criminal;
+﻿using API.Contracts.Requests.Criminal;
 using LIB.Managers;
 using LIB.ViewModels;
 using Microsoft.AspNetCore.Http;

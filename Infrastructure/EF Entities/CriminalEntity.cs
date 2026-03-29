@@ -14,7 +14,7 @@ public partial class CriminalEntity
 
     public DateTime CriminalSince { get; set; }
 
-    public virtual CriminalRiskLevelENtity Risk { get; set; } = null!;
+    public virtual CriminalRiskLevelEntity Risk { get; set; } = null!;
 
     public virtual ICollection<CrimeEntity> Crimes { get; set; } = new List<CrimeEntity>();
 }
