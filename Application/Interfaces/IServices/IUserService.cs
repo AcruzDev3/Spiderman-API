@@ -1,4 +1,5 @@
-﻿using Domain.Models;
+﻿using Application.Contracts.Requests.User;
+using Domain.Models;
 
 namespace Application.Interfaces.Services
 {
@@ -6,8 +7,8 @@ namespace Application.Interfaces.Services
     {
         Task<User> GetById(int id);
         Task<List<User>> GetAll();
-        Task Create(User dto);
-        Task Update(User dto);
+        Task Create(CreateUserRequest request);
+        Task Update(UpdateUserRequest request);
         Task Delete(int id);
     }
 }

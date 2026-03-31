@@ -1,4 +1,5 @@
-﻿using Domain.Models;
+﻿using Application.Contracts.Requests.Crime;
+using Domain.Models;
 
 namespace Application.Interfaces.Services
 {
@@ -6,8 +7,8 @@ namespace Application.Interfaces.Services
     {
         Task<Crime> GetById(int id);
         Task<List<Crime>> GetAll();
-        Task Create(Crime model);
-        Task Update(Crime model);
+        Task Create(CreateCrimeRequest request);
+        Task Update(UpdateCrimeRequest request);
         Task Delete(int id);
         Task<int> Solved(int idCrime);
     }
