@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace API.Contracts.Requests.Crime
+namespace Application.Contracts.Requests.Crime
 {
     public class UpdateCrimeRequest
     {

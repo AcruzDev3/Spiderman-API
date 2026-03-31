@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
-namespace API.Contracts.Requests.Criminal
+namespace Application.Contracts.Requests.Criminal
 {
     public class UpdateCriminalRequest
     {

@@ -1,20 +1,21 @@
-﻿using LIB.Validation;
+﻿using Application.Validation;
+
 using System.ComponentModel.DataAnnotations;
 
-namespace API.Contracts.Requests.User
+namespace Application.Contracts.Requests.User
 {
     public class UpdateUserPasswordRequest
     {
         [Required(ErrorMessage = "La contraseña anterior es obligatoria")]
         [StrongPasswrod]
-        public string previousPassword { get; set; }
+        public string PreviousPassword { get; set; }
 
         [Required(ErrorMessage = "La nueva contraseña es obligatoria")]
         [StrongPasswrod]
-        public string newPassword { get; set; }
+        public string NewPassword { get; set; }
 
         [Required(ErrorMessage = "La confirmación de la nueva contraseña es obligatoria")]
         [StrongPasswrod]
-        public string newPasswordConfirmation { get; set; }
+        public string NewPasswordConfirmation { get; set; }
     }
 }

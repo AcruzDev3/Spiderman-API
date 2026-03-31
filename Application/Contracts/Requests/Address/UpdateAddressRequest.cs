@@ -1,10 +1,14 @@
-﻿using LIB.Enums;
+﻿using Domain.Enums;
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
-namespace API.Contracts.Requests.Address
+namespace Application.Contracts.Requests.Address
 {
-    public class CreateAddressRequest
+    public class UpdateAddressRequest
     {
+        [Required(ErrorMessage = "El id es obligatoria")]
+        public int Id { get; set; }
+
         [Required(ErrorMessage = "El número es obligatorio")]
         public int Number { get; set; }
 
@@ -18,8 +22,9 @@ namespace API.Contracts.Requests.Address
 
         [Required(ErrorMessage = "La calle es obligatoria")]
         [StringLength(150, ErrorMessage = "La longitud de la calle no puede ser mayor a 150 caracteres")]
-        public string Street { get; set; }        
+        public string Street { get; set; }
 
-        public IFormFile? Image { get; set; }
+        [Required(ErrorMessage = "La imagen es obligatoria")]
+        public IFormFile Image { get; set; }
     }
 }
