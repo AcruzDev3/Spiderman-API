@@ -1,10 +1,8 @@
-﻿using Application.Interfaces.IRepositories;
+﻿using Domain.Interfaces.IRepositories;
 using Domain.Models;
 using Infrastructure.EF_Entities;
 using Infrastructure.Mappers;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.SqlServer.Server;
-using System.ComponentModel;
 
 namespace Infrastructure.Repositories
 {
