@@ -1,12 +1,14 @@
-﻿using LIB.DTOs.Address;
-using LIB.Interfaces.IManagers;
-using LIB.Interfaces.IRepositories;
-using LIB.Models;
-using LIB.ViewModels;
+﻿using Application.Contracts.Requests.Address;
+using Application.Contracts.Responses;
+using Application.Exceptions;
+using Application.Interfaces.Services;
+using Application.Mappers;
+using Domain.Interfaces.IRepositories;
+using Domain.Models;
 
 namespace Application.Services
 {
-    public class AddressService: IAddressManager
+    public class AddressService: IAddressService
     {
         private readonly IAddressRepository _addressRepository;
         public AddressService(IAddressRepository addressRepository)
@@ -14,93 +16,49 @@ namespace Application.Services
             this._addressRepository = addressRepository;
         }
 
-        public async Task<AddressViewModel> GetById(int id)
+        public async Task<AddressResponse> GetById(int id)
         {
-            AddressViewModel? addresViewModel = null;
-            try
-            {
-                Address? model = await this._addressRepository.GetById(id);
-                if (model == null) throw new Exception("No se pudo encontrar la direccion");
-                addresViewModel = new AddressViewModel(model);  
-            }
-            catch(Exception)
-            {
-                throw;
-            }
-            return addresViewModel; 
+            Address? model = await this._addressRepository.GetById(id);
+            if (model == null) throw new NotFoundException("La dirección no existe");
+            return AddressMapper.ToResponse(model);
         }
         
-        public async Task<List<AddressViewModel>> GetAll()
+        public async Task<List<AddressResponse>> GetAll()
         {
-            List<AddressViewModel> viewModels = new List<AddressViewModel>();
-            try {
-                List<Address>? models = await this._addressRepository.GetAll();
+            List<AddressResponse> viewModels = new List<AddressResponse>();
+            List<Address>? models = await this._addressRepository.GetAll();
                 
-                if (models == null) throw new Exception("No se han podido obtener las direcciones");
+            if (models == null) throw new NotFoundException("No se han podido obtener las direcciones");
                 
-                foreach (Address model in models) viewModels.Add(new AddressViewModel(model));
-            }
-            catch (Exception) 
-            {
-                throw;
-            }
+            foreach (Address model in models) viewModels.Add(AddressMapper.ToResponse(model));
             return viewModels;
         }
 
-        public async Task Create(CreateAddressRequest dto)
+        public async Task Create(CreateAddressRequest request, string image)
         {
-            try
-            {
-                if(dto == null) throw new Exception("La dirección no es válida");
+            Address model = AddressMapper.ToModel(request, image);
+            if (model == null) throw new ValidationException("La dirección no es válida");
 
-                AddressViewModel viewModel = new AddressViewModel(dto);
-                if(viewModel == null) throw new Exception("El modelo vista de la dirección no es válido");
-
-                Address model = new Address(viewModel);
-                if (model == null) throw new Exception("El modelo de la dirección no es válido");
-
-                await this._addressRepository.Add(model);
-                int rowsAffected = await this._addressRepository.SaveChanges();
-                if (rowsAffected != 1) throw new Exception("No se ha podido crear la direccion");
-            }
-            catch (Exception) 
-            {
-                throw;            
-            }
+            await this._addressRepository.Add(model);
         }
 
-        public async Task Update(UpdateAddressRequest dto)
+        public async Task Update(UpdateAddressRequest request, string image)
         {
-            try
-            {
-                if(dto == null) throw new Exception("La dirección no es válida");
-                
-                Address? model = await this._addressRepository.GetById(dto.Id);
-                if(model == null) throw new Exception("La dirección no existe");
+            Address? model = await this._addressRepository.GetById(request.Id);
+            if(model == null) throw new NotFoundException("La dirección no existe");
 
-                this._addressRepository.Update(model);
-                int rowsAffected = await this._addressRepository.SaveChanges();
-                
-                if (rowsAffected != 1) throw new Exception("No se ha podido actualizar la direccion");
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            Address newAddress = AddressMapper.ToModel(request, image);
+            if (model == null) throw new ValidationException("La dirección no es válida");
+
+            await this._addressRepository.Update(model);
         }
+
         public async Task Delete(int id)
         {
-            try
-            {
-                Address? model = await this._addressRepository.GetById(id);
-                if (model == null) throw new Exception("La direccion no existe");
+            Address? model = await this._addressRepository.GetById(id);
+            if (model == null) throw new NotFoundException("La direccion no existe");
 
-                this._addressRepository.Delete(model);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            await this._addressRepository.Delete(model);
         }
     }
 }

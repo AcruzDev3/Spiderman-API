@@ -1,14 +1,15 @@
 ﻿using Application.Contracts.Requests.Criminal;
+using Application.Contracts.Responses;
 using Domain.Models;
 
 namespace Application.Interfaces.Services
 {
     public interface ICriminalService
     {
-        Task<Criminal> GetById(int id);
-        Task<List<Criminal>> GetAll();
-        Task Create(CreateCriminalRequest request);
-        Task Update(UpdateCriminalRequest request);
+        Task<CriminalResponse> GetById(int id);
+        Task<List<CriminalResponse>> GetAll();
+        Task Create(CreateCriminalRequest request, string pathImageProfile);
+        Task Update(UpdateCriminalRequest request, string pathImageProfile);
         Task Delete(int id);
     }
 }

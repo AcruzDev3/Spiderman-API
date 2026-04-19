@@ -1,6 +1,7 @@
 ﻿using Domain.Interfaces.IRepositories;
 using Domain.Models;
 using Infrastructure.EF_Entities;
+using Infrastructure.Exceptions;
 using Infrastructure.Mappers;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,8 +19,10 @@ namespace Infrastructure.Repositories
             UserEntity? entity = await this._context.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.UserId == id);
-            Role role = RoleMapper.ToDomain(entity.Role);
-            return UserMapper.ToDomain(entity, role); 
+
+            if (entity == null) return null;
+
+            return await this.GetUserModel(entity);
         }
 
         public async Task<List<User>?> GetByIds(List<int> ids) {
@@ -27,10 +30,7 @@ namespace Infrastructure.Repositories
                 .Where(u => ids.Contains(u.UserId))
                 .ToListAsync();
             List<User> users = new List<User>();
-            foreach (UserEntity entity in entities) {
-                Role role = RoleMapper.ToDomain(entity.Role);
-                users.Add(UserMapper.ToDomain(entity, role));
-            }
+            foreach (UserEntity entity in entities) users.Add(await this.GetUserModel(entity));
             return users;
         }
 
@@ -38,10 +38,7 @@ namespace Infrastructure.Repositories
             List<UserEntity> entities = await this._context.Users
                                     .ToListAsync();
             List<User> users = new List<User>();
-            foreach (UserEntity entity in entities) {
-                Role role = RoleMapper.ToDomain(entity.Role);
-                users.Add(UserMapper.ToDomain(entity, role));
-            }
+            foreach (UserEntity entity in entities) users.Add(await this.GetUserModel(entity));
             return users;
         }
 
@@ -66,34 +63,37 @@ namespace Infrastructure.Repositories
 
         public async Task Add(User model) {
             await this._context.Users.AddAsync(UserMapper.ToEntity(model));
+            int rowsAffected = await this._context.SaveChangesAsync();
+            if(rowsAffected != 1) throw new InfrastructureException("Error al añadir el usuario a la base de datos");
         }
 
-        public void Update(User model) {
+        public async Task Update(User model) {
             this._context.Users.Update(UserMapper.ToEntity(model));
+            int rowsAffected = await this._context.SaveChangesAsync();
+            if (rowsAffected != 1) throw new InfrastructureException("Error al actualizar el usuario a la base de datos");
         }
 
-        public void Delete(User model) {
+        public async Task Delete(User model) {
             this._context.Users.Remove(UserMapper.ToEntity(model));
+            int rowsAffected = await this._context.SaveChangesAsync();
+            if (rowsAffected != 1) throw new InfrastructureException("Error al eliminar el usuario a la base de datos");
         }
 
-        public async Task<int> SaveChanges() {
-            return await this._context.SaveChangesAsync();
-        }
-
-        public async Task<User?> Exists(User model) {
+        public async Task<bool> Exists(string email) {
             UserEntity? entity = this._context.Users
                 .AsNoTracking()
-                .FirstOrDefault(u => u.Email.Equals(model.Email) &&
-                u.Name.Equals(model.Name) && u.Role.Name.Equals(model.Role));
-            Role? role = await GetRoleAsync(model.Role.Name);
-            return UserMapper.ToDomain(entity, role);
+                .FirstOrDefault(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+            if (entity == null) return false;
+            else return true;
         }
 
-        public async Task<Role?> GetRoleAsync(string? role) {
+        public async Task<Role?> GetRoleAsync(int idRole) {
             RoleEntity? entity = await _context.Roles
                 .AsNoTracking()
-                .FirstOrDefaultAsync(r => r.Name.Equals(role, StringComparison.OrdinalIgnoreCase));
-            return RoleMapper.ToDomain(entity);
+                .FirstOrDefaultAsync(r => r.RoleId == idRole);
+
+            if (entity == null) return null;
+            else return RoleMapper.ToDomain(entity);
         }
 
         private List<Criminal> GetCriminalsOfCrime(List<CriminalEntity> criminalsEntities) {
@@ -114,6 +114,11 @@ namespace Infrastructure.Repositories
                 users.Add(UserMapper.ToDomain(user, role));
             }
             return users;
+        }
+
+        private async Task<User> GetUserModel(UserEntity entity) {
+            Role role = RoleMapper.ToDomain(entity.Role);
+            return UserMapper.ToDomain(entity, role);
         }
     }
 }

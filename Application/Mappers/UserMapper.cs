@@ -1,5 +1,6 @@
 ﻿using Domain.Models;
 using Application.Contracts.Responses;
+using Application.Contracts.Requests.User;
 
 namespace Application.Mappers
 {
@@ -13,6 +14,13 @@ namespace Application.Mappers
                 Role = role,
                 Image = user.Image
             };
+        }
+
+        public static User ToModel(CreateUserRequest request, Role role, string pathImage) {
+            return new User(request.Name, request.Email, request.Password, role, pathImage);
+        }
+        public static User ToModel(UpdateUserRequest request, Role role, string password, string pathImage) {
+            return new User(request.Name, request.Email, password, role, pathImage);
         }
     }
 }

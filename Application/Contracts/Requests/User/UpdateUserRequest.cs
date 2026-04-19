@@ -15,10 +15,10 @@ namespace Application.Contracts.Requests.User
         [Required(ErrorMessage = "El correo electrónico es obligatorio")]
         [EmailAddress(ErrorMessage = "El formato del correo electrónico no es válido")]
         [StringLength(255, ErrorMessage = "La longitud del correo electrónico no pueder ser mayor a 255 caracteres")]
-        public string? Email { get; set; }
+        public string Email { get; set; }
 
         [Required(ErrorMessage = "El rol del usuario es obligatorio")]
-        public string? Role { get; set; }
+        public int RoleId { get; set; }
 
         [Required(ErrorMessage = "La imagen es obligatoria")]
         [StringLength(300, ErrorMessage = "La ruta de la imagen no puede superar ")]

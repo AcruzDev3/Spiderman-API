@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces;
-using Application.Interfaces.IRepositories;
+using Domain.Interfaces.IRepositories;
 using Infrastructure.Repositories;
 using Infrastructure.Security;
 using Microsoft.Extensions.DependencyInjection;

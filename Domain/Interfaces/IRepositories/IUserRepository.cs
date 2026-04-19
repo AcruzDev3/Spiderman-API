@@ -9,9 +9,9 @@ namespace Domain.Interfaces.IRepositories
         Task<List<User>> GetAll();
         Task<List<Crime>?> GetCrimes(User model);
         Task Add(User model);
-        void Update(User model);
-        void Delete(User model);
-        Task<int> SaveChanges();
-        Task<Role?> GetRoleAsync(string? role);
+        Task Update(User model);
+        Task Delete(User model);
+        Task<Role?> GetRoleAsync(int idRole);
+        Task<bool> Exists(string email);
     }
 }

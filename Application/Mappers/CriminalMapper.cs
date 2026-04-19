@@ -1,5 +1,6 @@
 ﻿using Domain.Models;
 using Application.Contracts.Responses;
+using Application.Contracts.Requests.Criminal;
 
 namespace Application.Mappers
 {
@@ -14,6 +15,16 @@ namespace Application.Mappers
                 Image = criminal.Image,
                 Since = criminal.Since,
             };
+        }
+
+        public static Criminal ToModel(CreateCriminalRequest request, CriminalRiskLevel risk,
+            string pathImageProfile) {
+            return new Criminal(request.Name, request.Description, risk, pathImageProfile, request.Since);
+        }
+
+        public static Criminal ToModel(UpdateCriminalRequest request, CriminalRiskLevel risk,
+            string pathImageProfile) {
+            return new Criminal(request.Name, request.Description, risk, pathImageProfile, request.Since);
         }
     }
 }

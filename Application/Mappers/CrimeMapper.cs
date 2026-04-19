@@ -1,5 +1,6 @@
 ﻿using Domain.Models;
 using Application.Contracts.Responses;
+using Application.Contracts.Requests.Crime;
 
 namespace Application.Mappers
 {
@@ -20,6 +21,16 @@ namespace Application.Mappers
                 DateStart = crime.DateStart,
                 DateEnd = crime.DateEnd
             };
+        }
+
+        public static Crime ToModel(CreateCrimeRequest request, Address address, 
+            List<Criminal> criminals, List<User> heroes, CrimeGrade grade, CrimeType type) {
+            return new Crime(address, heroes, criminals, grade, type, request.Description, false, DateTime.UtcNow);
+        }
+
+        public static Crime ToModel(UpdateCrimeRequest request, Address address,
+            List<Criminal> criminals, List<User> heroes, CrimeGrade grade, CrimeType type) {
+            return new Crime(address, heroes, criminals, grade, type, request.Description, request.Status, request.DateStart, request.DateEnd);
         }
     }
 }

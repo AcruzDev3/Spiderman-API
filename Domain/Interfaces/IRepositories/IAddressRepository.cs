@@ -7,8 +7,8 @@ namespace Domain.Interfaces.IRepositories
         Task<Address?> GetById(int id);
         Task<List<Address>?> GetAll();
         Task Add(Address address);
-        void Update(Address address);
-        void Delete(Address address);
-        Task<int> SaveChanges();
+        Task Update(Address address);
+        Task Delete(Address address);
+        Task<bool> Exists(Address address);
     }
 }

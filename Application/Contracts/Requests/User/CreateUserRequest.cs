@@ -20,7 +20,7 @@ namespace Application.Contracts.Requests.User
         public string Password { get; set; }
 
         [Required(ErrorMessage = "El rol del usuario es obligatorio")]
-        public string Role { get; set; }
+        public int RoleId { get; set; }
 
         [StringLength(300, ErrorMessage = "La ruta de la imagen no puede superar ")]
         public IFormFile? Image { get; set; }

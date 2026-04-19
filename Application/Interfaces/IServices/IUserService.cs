@@ -1,14 +1,14 @@
 ﻿using Application.Contracts.Requests.User;
-using Domain.Models;
+using Application.Contracts.Responses;
 
 namespace Application.Interfaces.Services
 {
     public interface IUserService
     {
-        Task<User> GetById(int id);
-        Task<List<User>> GetAll();
-        Task Create(CreateUserRequest request);
-        Task Update(UpdateUserRequest request);
+        Task<UserResponse> GetById(int id);
+        Task<List<UserResponse>> GetAll();
+        Task Create(CreateUserRequest request, string pathImageProfile);
+        Task Update(UpdateUserRequest request, string pathImageProfile);
         Task Delete(int id);
     }
 }

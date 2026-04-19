@@ -1,12 +1,14 @@
-﻿using LIB.DTOs.Criminal;
-using LIB.Interfaces.IManagers;
-using LIB.Interfaces.IRepositories;
-using LIB.Models;
-using LIB.ViewModels;
+﻿using Application.Contracts.Requests.Criminal;
+using Application.Contracts.Responses;
+using Application.Exceptions;
+using Application.Interfaces.Services;
+using Application.Mappers;
+using Domain.Interfaces.IRepositories;
+using Domain.Models;
 
 namespace Application.Services
 {
-    public class CriminalService : ICriminalManager
+    public class CriminalService : ICriminalService
     {
         private readonly ICriminalRepository _criminalRepository;
         private readonly ICrimeRepository _crimeRepository;
@@ -16,112 +18,67 @@ namespace Application.Services
             this._crimeRepository = _crimeRepository;
         }
 
-        public async Task<CriminalViewModel> GetById(int id)
+        public async Task<CriminalResponse> GetById(int id)
         {
-            CriminalViewModel? viewModel = null;
-            try
-            {
-                Criminal? model = await this._criminalRepository.GetById(id);
+            Criminal? model = await this._criminalRepository.GetById(id);
+            if (model == null) throw new NotFoundException("El criminal no existe");
 
-                if (model == null) throw new Exception("No se pudo encontrar el criminal");
-
-                viewModel = new CriminalViewModel(model);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            return viewModel;
+            CriminalRiskLevelResponse risk = CriminalRiskLevelMapper.ToResponse(model.Risk);
+            return CriminalMapper.ToResponse(model, risk);
         }
 
-        public async Task<List<CriminalViewModel>> GetAll()
+        public async Task<List<CriminalResponse>> GetAll()
         {
-            List<CriminalViewModel> viewModels = new List<CriminalViewModel>();
-            try
-            {
-                List<Criminal>? models = await this._criminalRepository.GetAll();
-                if (models == null) throw new Exception("No se han podido obtener los criminales");
+        List<CriminalResponse> viewModels = new List<CriminalResponse>();
+            List<Criminal>? models = await this._criminalRepository.GetAll();
+            if (models == null) throw new NotFoundException("No se han podido obtener los criminales");
 
-                foreach (Criminal model in models) viewModels.Add(new CriminalViewModel(model));
-            }
-            catch (Exception)
-            {
-                throw;
+            foreach (Criminal model in models) {
+                CriminalRiskLevelResponse risk = CriminalRiskLevelMapper.ToResponse(model.Risk);
+                viewModels.Add(CriminalMapper.ToResponse(model, risk));
             }
             return viewModels;
         }
 
-        public async Task Create(CreateCriminalRequest dto)
+        public async Task Create(CreateCriminalRequest request, string pathImageProfile)
         {
-            try
-            {
-                CriminalRiskLevel? riskLevel = await this._criminalRepository.GetCriminalRiskLevelAsync(dto.Risk);
-                if (riskLevel == null) throw new Exception("El nivel de riesgo no es válido");
+            CriminalRiskLevel? riskLevel = await this._criminalRepository.GetCriminalRiskLevelAsync(request.RiskId);
+            if (riskLevel == null) throw new NotFoundException("El nivel de riesgo no es válido");
 
-                CriminalViewModel viewModel = new CriminalViewModel(dto, riskLevel);
-                if(await this._criminalRepository.Exists(viewModel) == null) throw new Exception("El criminal ya existe");
+            Criminal model = CriminalMapper.ToModel(request, riskLevel, pathImageProfile);
+            if(await this._criminalRepository.Exists(request.Name)) 
+                throw new ValidationException("El criminal ya existe");
 
-                Criminal? model = new Criminal(viewModel, riskLevel);
-
-                if(model == null) throw new Exception("No se pudo crear el criminal");
-
-                await this._criminalRepository.Add(model);
-                int rowsAffected = await this._criminalRepository.SaveChanges();
-
-                if(rowsAffected != 1) throw new Exception("No se pudo crear el criminal");
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            await this._criminalRepository.Add(model);
         }
 
-        public async Task Update(UpdateCriminalRequest dto) {
-            try {
-                if(dto == null) throw new Exception("El criminal no es válido");
+        public async Task Update(UpdateCriminalRequest request, string pathImageProfile) {
+            CriminalRiskLevel? riskLevel = await this._criminalRepository.GetCriminalRiskLevelAsync(request.RiskId);
+            if (riskLevel == null) throw new NotFoundException("El nivel de riesgo no es válido");
 
-                Criminal? model = await this._criminalRepository.GetById(dto.Id);
-                if(model == null) throw new Exception("El criminal no existe");
+            Criminal? model = await this._criminalRepository.GetById(request.Id);
+                if (model == null) throw new ValidationException("El criminal no existe");
 
-                this._criminalRepository.Update(model);
-                int rowsAffected = await this._criminalRepository.SaveChanges();
-
-                if(rowsAffected != 1) throw new Exception("No se ha podido actualizar al criminal");
-
-            } catch(Exception) {
-                throw;
-            }
+            Criminal newUser = CriminalMapper.ToModel(request, riskLevel, pathImageProfile);
+            await this._criminalRepository.Update(model);
         }
 
         public async Task Delete(int id)
         {
-            try
-            {   
-                Criminal? criminal = await this._criminalRepository.GetById(id);
-                if (criminal == null) throw new Exception("No se pudo encontrar el criminal");
+            Criminal? criminal = await this._criminalRepository.GetById(id);
+            if (criminal == null) throw new NotFoundException("No se pudo encontrar el criminal");
 
-                List<Crime>? crimes = await this._criminalRepository.GetCrimes(criminal);
+            List<Crime>? crimes = await this._criminalRepository.GetCrimes(criminal);
                 
-                this._criminalRepository.Delete(criminal);
+            this._criminalRepository.Delete(criminal);
                 
-                int rowsAffected = await this._criminalRepository.SaveChanges();
-                if(rowsAffected != 1) throw new Exception("No se pudo eliminar el criminal");
+            if (crimes == null) return;
+            List<Crime>? crimesWithoutCriminals = crimes
+                .Where(c => !c.Criminals.Any())
+                .ToList();
 
-
-                if (crimes == null) return;
-                List<Crime>? crimesWithoutCriminals = crimes
-                    .Where(c => !c.Criminals.Any())
-                    .ToList();
-
-                if (crimesWithoutCriminals.Any()) {
-                    this._crimeRepository.DeleteRange(crimesWithoutCriminals);
-                    await this._criminalRepository.SaveChanges();
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            if (crimesWithoutCriminals.Any())
+                await this._crimeRepository.DeleteRange(crimesWithoutCriminals);
         }
     }
 }

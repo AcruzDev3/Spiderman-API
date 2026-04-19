@@ -1,6 +1,6 @@
 ﻿using Application.Contracts.Requests.Criminal;
+using Application.Contracts.Responses;
 using Application.Interfaces.Services;
-using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers 
@@ -15,7 +15,7 @@ namespace API.Controllers
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id) {
-            Criminal? criminal = null;
+            CriminalResponse criminal = null;
 
             criminal = await this._criminalService.GetById(id);
             if (criminal == null) return NotFound("El criminal no existe");
@@ -25,7 +25,7 @@ namespace API.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetAll() {
-            List<Criminal> criminals = await this._criminalService.GetAll();
+            List<CriminalResponse> criminals = await this._criminalService.GetAll();
             if (criminals.Count == 0) return NotFound("No hay criminales registrados");
             return Ok(criminals);
         }
@@ -33,7 +33,9 @@ namespace API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateCriminalRequest request) {
             try {
-                await this._criminalService.Create(request);
+                // Servicio de imagen
+                string imageUrl = null;
+                await this._criminalService.Create(request, imageUrl);
             } catch (Exception ex) {
                 return BadRequest(ex.Message);
             }
@@ -43,7 +45,8 @@ namespace API.Controllers
         [HttpPost("Update")]
         public async Task<IActionResult> Update([FromBody] UpdateCriminalRequest request) {
             try {
-                await this._criminalService.Update(request);
+                string imageUrl = null; 
+                await this._criminalService.Update(request, imageUrl);
             } catch (Exception ex) {
                 return BadRequest(ex.Message);
             }

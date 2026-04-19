@@ -5,10 +5,10 @@ namespace Application.Contracts.Requests.Crime
     public class CreateCrimeRequest
     {
         [Required(ErrorMessage = "El nombre es obligatorio")]
-        public int GradeName { get; set; }
+        public int GradeId { get; set; }
 
         [Required(ErrorMessage = "El tipo es obligatorio")]
-        public int TypeName { get; set; }
+        public int TypeId { get; set; }
 
         [StringLength(300, ErrorMessage = "La descripción no puede superar los 300 caracteres")]
         public string? Description { get; set; }

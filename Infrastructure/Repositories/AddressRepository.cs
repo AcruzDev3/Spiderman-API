@@ -1,7 +1,7 @@
-﻿
-using Domain.Interfaces.IRepositories;
+﻿using Domain.Interfaces.IRepositories;
 using Domain.Models;
 using Infrastructure.EF_Entities;
+using Infrastructure.Exceptions;
 using Infrastructure.Mappers;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,29 +18,29 @@ namespace Infrastructure.Repositories
             AddressEntity? entity = await this._context.Addresses
                 .AsNoTracking()
                 .FirstOrDefaultAsync(a => a.AddressId == id);
-            return AddressMapper.ToDomain(entity);
+            if (entity == null) return null;
+            else return AddressMapper.ToDomain(entity);
         }
 
         public async Task<List<Address>?> GetAll() {
             List<AddressEntity> entities = await this._context.Addresses.ToListAsync();
+
             List<Address> addresses = new List<Address>();
-            foreach(AddressEntity entity in entities)
-                addresses.Add(AddressMapper.ToDomain(entity));
+            foreach(AddressEntity entity in entities) addresses.Add(AddressMapper.ToDomain(entity));
+
             return addresses;
         }
 
-        public async Task<Address?> Exists(Address viewModel) {
+        public async Task<bool> Exists(Address model) {
             try {
-                if (viewModel == null) throw new Exception("El modelo vista de la dirección no es válido");
-
                 AddressEntity? entity = await this._context.Addresses
-                   .FirstOrDefaultAsync(m => m.Street.Equals(viewModel.Street, StringComparison.OrdinalIgnoreCase) &&
-                   m.ZipCode.Equals(viewModel.ZipCode, StringComparison.OrdinalIgnoreCase) &&
-                   m.Side.Equals(viewModel.Side.ToString(), StringComparison.OrdinalIgnoreCase) &&
-                   m.Number == viewModel.Number
+                   .FirstOrDefaultAsync(m => m.Street.Equals(model.Street, StringComparison.OrdinalIgnoreCase) &&
+                   m.ZipCode.Equals(model.ZipCode, StringComparison.OrdinalIgnoreCase) &&
+                   m.Side.Equals(model.Side.ToString(), StringComparison.OrdinalIgnoreCase) &&
+                   m.Number == model.Number
                 );
-
-                return AddressMapper.ToDomain(entity);
+                if (entity == null) return false;
+                else return true;
             } catch (Exception) {
                 throw;
             }
@@ -48,18 +48,20 @@ namespace Infrastructure.Repositories
 
         public async Task Add(Address address) {
             await this._context.Addresses.AddAsync(AddressMapper.ToEntity(address));
+            int rowsAffected = await this._context.SaveChangesAsync();
+            if (rowsAffected != 1) throw new InfrastructureException("Error al añadir la dirección en la base de datos");
         }
 
-        public void Update(Address address) {
+        public async Task Update(Address address) {
             this._context.Addresses.Update(AddressMapper.ToEntity(address));
+            int rowsAffected = await this._context.SaveChangesAsync();
+            if (rowsAffected != 1) throw new InfrastructureException("Error al actualizar la dirección en la base de datos");
         }
 
-        public void Delete(Address address) {
+        public async Task Delete(Address address) {
             this._context.Addresses.Remove(AddressMapper.ToEntity(address));
-        }
-
-        public async Task<int> SaveChanges() {
-            return await this._context.SaveChangesAsync();
+            int rowsAffected = await this._context.SaveChangesAsync();
+            if (rowsAffected != 1) throw new InfrastructureException("Error al eliminar la dirección en la base de datos");
         }
     }
 }

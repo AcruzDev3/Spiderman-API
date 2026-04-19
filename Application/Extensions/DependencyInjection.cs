@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Application.Services;
 
-namespace LIB.Extensions
+namespace Application.Extensions
 {
     public static class DependencyInjection
     {

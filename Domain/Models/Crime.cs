@@ -109,5 +109,10 @@ namespace Domain.Models
             if (endUtc == null && status == true) throw new DomainValidationException("El estado del crimen no puede estar terminado si no existe la fecha fin");
             this.Status = status;
         }
+
+        public void Solved() {
+            this.Status = true;
+            this.DateEnd = DateTime.UtcNow;
+        }
     }
 }

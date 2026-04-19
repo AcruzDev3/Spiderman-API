@@ -17,7 +17,7 @@ namespace Application.Contracts.Requests.Criminal
         public string Description { get; set; }
 
         [Required(ErrorMessage = "El riesgo es obligatorio")]
-        public string Risk { get; set; }
+        public int RiskId { get; set; }
 
         [Required(ErrorMessage = "La imagen es obligatoria")]
         public IFormFile Image { get; set; }

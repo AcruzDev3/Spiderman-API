@@ -1,11 +1,9 @@
-﻿using Application.Services;
-using Domain.Interfaces.IRepositories;
+﻿using Domain.Interfaces.IRepositories;
 using Domain.Models;
 using Infrastructure.EF_Entities;
+using Infrastructure.Exceptions;
 using Infrastructure.Mappers;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using System.Reflection.Metadata;
 
 namespace Infrastructure.Repositories
 {
@@ -23,7 +21,8 @@ namespace Infrastructure.Repositories
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.CrimeId == id);
 
-            return await GetCrimeModel(entity);
+            if(entity == null) return null;
+            else return await this.GetCrimeModel(entity);
         }
 
         public async Task<List<Crime>?> GetAll() {
@@ -45,34 +44,49 @@ namespace Infrastructure.Repositories
                 m.AddressId == model.Address.Id
             );
         }
-        public async Task<CrimeGrade?> GetGradeByName(string? gradeName) {
+
+        public async Task<CrimeGrade?> GetGradeByName(int gradeId) {
             CrimeGradeEntity? entity = await this._context.CrimeGrades
-                .FirstOrDefaultAsync(m => m.Name.Equals(gradeName, StringComparison.OrdinalIgnoreCase));
-            return CrimeGradeMapper.ToDomain(entity);
+                .FirstOrDefaultAsync(m => m.CrimeGradeId == gradeId);
+            if(entity  == null) return null;
+            else return CrimeGradeMapper.ToDomain(entity);
         }
 
-        public async Task<CrimeType?> GetTypeByName(string? typeName) { 
+        public async Task<CrimeType?> GetTypeByName(int typeId) { 
             CrimeTypeEntity? entity = await this._context.CrimeTypes
-                .FirstOrDefaultAsync(m => m.Name.Equals(typeName, StringComparison.OrdinalIgnoreCase));
-            return CrimeTypeMapper.ToDomain(entity);
+                .FirstOrDefaultAsync(m => m.CrimeTypeId == typeId);
+            if (entity == null) return null;
+            else return CrimeTypeMapper.ToDomain(entity);
         }
 
-        public async Task Add(Crime crime) 
-            => await this._context.Crimes.AddAsync(await GetCrimeEntity(crime));
+        public async Task Add(Crime crime) {
+            await this._context.Crimes.AddAsync(await this.GetCrimeEntity(crime));
+            int rowsAffected = await this._context.SaveChangesAsync();
+            if (rowsAffected != 1) throw new InfrastructureException("Error al añadir el crimen en la base de datos");
+        }
+            
         
-        public async Task Update(Crime crime)
-            => this._context.Crimes.Update(await GetCrimeEntity(crime));
-        
+        public async Task Update(Crime crime) {
+            this._context.Crimes.Update(await this.GetCrimeEntity(crime));
+            int rowsAffected = await this._context.SaveChangesAsync();
+            if (rowsAffected != 1) throw new InfrastructureException("Error al actualizar el crimen en la base de datos");
+        }
+            
+        public async Task Delete(Crime crime) {
+            this._context.Crimes.Remove(await this.GetCrimeEntity(crime));
+            int rowsAffected = await this._context.SaveChangesAsync();
+            if (rowsAffected != 1) throw new InfrastructureException("Error al eliminar el crimen en la base de datos");
 
-        public async Task Delete(Crime crime) 
-           => this._context.Crimes.Remove(await GetCrimeEntity(crime));
-        
+        }
+           
         public async Task DeleteRange(List<Crime> models) {
             List<CrimeEntity> entities = new List<CrimeEntity>();
 
-            foreach (Crime model in models) entities.Add(await GetCrimeEntity(model));
+            foreach (Crime model in models) entities.Add(await this.GetCrimeEntity(model));
                 
             this._context.Crimes.RemoveRange(entities);
+            int rowsAffected = await this._context.SaveChangesAsync();
+            if(rowsAffected == 0) throw new InfrastructureException("Error al eliminar los crímenes en la base de datos");
         }
 
         private async Task<List<UserEntity>> GetUsersOfCrime(List<User> users) {
@@ -89,10 +103,6 @@ namespace Infrastructure.Repositories
             foreach (Criminal criminal in criminals) criminalEntities.Add(CriminalMapper.ToEntity(criminal));
 
             return criminalEntities;
-        }
-
-        public async Task<int> SaveChanges() {
-            return await this._context.SaveChangesAsync();
         }
 
         private async Task<CrimeEntity> GetCrimeEntity(Crime crime) {

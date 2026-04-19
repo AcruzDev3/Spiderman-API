@@ -7,8 +7,8 @@ namespace Domain.Models
         private int _id;
         private string _name;
 
-        public int Id { get => this._id; set => this._id = value; }
-        public string Name { get => this._name; set => this._name = value; }
+        public int Id { get => this._id; private set => this._id = value; }
+        public string Name { get => this._name; private set => this._name = value; }
 
         // Constructor para recibir o modificar un nivel de peligrosidad
         public CriminalRiskLevel(int id, string name) {

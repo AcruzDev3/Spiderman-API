@@ -23,7 +23,7 @@ public partial class SpidermanContext : DbContext
 
     public virtual DbSet<CriminalEntity> Criminals { get; set; }
 
-    public virtual DbSet<CriminalRiskLevelENtity> CriminalRiskLevels { get; set; }
+    public virtual DbSet<CriminalRiskLevelEntity> CriminalRiskLevels { get; set; }
 
     public virtual DbSet<RoleEntity> Roles { get; set; }
 
@@ -186,7 +186,7 @@ public partial class SpidermanContext : DbContext
                 .HasConstraintName("FK__criminal__risk_i__7BE56230");
         });
 
-        modelBuilder.Entity<CriminalRiskLevelENtity>(entity =>
+        modelBuilder.Entity<CriminalRiskLevelEntity>(entity =>
         {
             entity.HasKey(e => e.CriminalRiskLevelId).HasName("PK__criminal__15FF8BAFFB9A156A");
 

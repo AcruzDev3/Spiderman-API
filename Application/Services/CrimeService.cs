@@ -1,12 +1,16 @@
-﻿using LIB.Models;
-using LIB.ViewModels;
-using LIB.Interfaces.IManagers;
-using LIB.Interfaces.IRepositories;
-using LIB.DTOs.Crime;
+﻿
+using Application.Contracts.Requests.Crime;
+using Application.Contracts.Responses;
+using Application.Exceptions;
+using Application.Interfaces.Services;
+using Application.Mappers;
+using Domain.Interfaces.IRepositories;
+using Domain.Models;
+using System.Linq.Expressions;
 
 namespace Application.Services
 {
-    public class CrimeService : ICrimeManager
+    public class CrimeService : ICrimeService
     {
         private readonly ICrimeRepository _crimeRepository;
         private readonly  ICriminalRepository _criminalRepository;
@@ -20,135 +24,113 @@ namespace Application.Services
             this._addressRepository = addressRepository;
         }
 
-        public async Task<CrimeViewModel> GetById(int id)
+        public async Task<CrimeResponse> GetById(int id)
         {
-            CrimeViewModel? viewModel = null;
-            try {
+            Crime? model = await this._crimeRepository.GetById(id);
+            if(model == null) throw new NotFoundException("No se pudo encontrar el crimen");
 
-                Crime? model = await this._crimeRepository.GetById(id);
-                if(model == null) throw new Exception("No se pudo encontrar el crimen");
-                viewModel = new CrimeViewModel(model);
-            }
-            catch (Exception) {
-                throw;
-            }
-            return viewModel;
+            return await this.GetCrime(model);
         }
-        public async Task<List<CrimeViewModel>> GetAll()
+
+        public async Task<List<CrimeResponse>> GetAll()
         {
-            List<CrimeViewModel> viewModels = new List<CrimeViewModel>();
-            try
-            {
-                List<Crime>?  models = await this._crimeRepository.GetAll();
+            List<CrimeResponse> viewModels = new List<CrimeResponse>();
+            List<Crime>?  models = await this._crimeRepository.GetAll();
+            if(models == null) throw new NotFoundException("No se pudieron obtener los crímenes");
 
-                if(models == null) throw new Exception("No se han podido obtener los crimenes");
-
-                foreach (Crime model in models) viewModels.Add(new CrimeViewModel(model));
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            foreach (Crime model in models) viewModels.Add(await this.GetCrime(model));
             return viewModels;
         }
 
-        public async Task Create(CreateCrimeRequest dto)
+        public async Task Create(CreateCrimeRequest request)
         {
-            try
-            {
-                if(dto == null) throw new Exception("El crimen no es válido");
+            CrimeGrade? grade = await this._crimeRepository.GetGradeByName(request.GradeId);
+            if (grade == null) throw new NotFoundException("El grado del crimen no es válido");
 
-                CrimeGrade? grade = await this._crimeRepository.GetGradeByName(dto.GradeName);
-                if (grade == null) throw new Exception("El grado del crimen no es válido");
+            CrimeType? type = await this._crimeRepository.GetTypeByName(request.TypeId);
+            if (type == null) throw new NotFoundException("El tipo del crimen no es válido");
 
-                CrimeType? type = await this._crimeRepository.GetTypeByName(dto.TypeName);
-                if (type == null) throw new Exception("El tipo del crimen no es válido");
+            List<User>? users = await this._userRepository.GetByIds(request.UserIds);
+            if (users == null) throw new NotFoundException("El usuario no es válido");
 
-                List<User>? users = await this._userRepository.GetByIds(dto.UserIds);
-                if(users == null) throw new Exception("El usuario no es válido");
+            List<Criminal>? criminals = await this._criminalRepository.GetByIds(request.CriminalIds);
+            if (criminals == null) throw new NotFoundException("Los criminales no son válidos");
 
-                List<Criminal>? criminals = await this._criminalRepository.GetByIds(dto.CriminalIds);
-                if (criminals == null) throw new Exception("Los criminales no son válidos");
+            Address? address = await this._addressRepository.GetById(request.AddressId);
+            if (address == null) throw new NotFoundException("La dirección no es válida");
 
-                Address? address = await this._addressRepository.GetById(dto.AddressId);
-                if (address == null) throw new Exception("La dirección no es válida");
+            Crime model = CrimeMapper.ToModel(request, address, criminals, users, grade, type);
+            if (model == null) throw new ValidationException("El crimen no es válido");
 
-                CrimeViewModel viewModel = new CrimeViewModel(dto);
-                if(viewModel == null) throw new Exception("El crimen no es válido");
-
-                Crime? model = new Crime(users, criminals, dto.Description, grade, type, address);
-                if(model == null) throw new Exception("El crimen no es válido");
-
-                await this._crimeRepository.Add(model);
-                int rowsAffected = await this._crimeRepository.SaveChanges();
-                if (rowsAffected != 1) throw new Exception("No se pudo crear el crimen");
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            await this._crimeRepository.Add(model);
         }
 
-        public async Task Update(UpdateCrimeRequest dto) {
-            try {
-                if(dto == null) throw new Exception("El crimen no es válido");
+        public async Task Update(UpdateCrimeRequest request) {
+            CrimeGrade? grade = await this._crimeRepository.GetGradeByName(request.GradeId);
+            if (grade == null) throw new NotFoundException("El grado del crimen no es válido");
 
-                Crime? model = await this._crimeRepository.GetById(dto.Id);
-                if(model == null) throw new Exception("El crimen no existe");
+            CrimeType? type = await this._crimeRepository.GetTypeByName(request.TypeId);
+            if (type == null) throw new NotFoundException("El tipo del crimen no es válido");
 
-                this._crimeRepository.Update(model);
-                int rowsAffected = await this._crimeRepository.SaveChanges();
+            List<User>? users = await this._userRepository.GetByIds(request.UserIds);
+            if (users == null) throw new NotFoundException("El usuario no es válido");
 
-                if (rowsAffected != 1) throw new Exception("No se pudo actualizar el crimen");
-            } catch(Exception) {
-                throw;
-            }
+            List<Criminal>? criminals = await this._criminalRepository.GetByIds(request.CriminalIds);
+            if (criminals == null) throw new NotFoundException("Los criminales no son válidos");
+
+            Address? address = await this._addressRepository.GetById(request.AddressId);
+            if (address == null) throw new NotFoundException("La dirección no es válida");
+
+            Crime model = CrimeMapper.ToModel(request, address, criminals, users, grade, type);
+            if (model == null) throw new ValidationException("El crimen no es válido");
+
+            await this._crimeRepository.Update(model);
         }
         public async Task Delete(int id)
         {
-            try
-            {
-                Crime? crime = await this._crimeRepository.GetById(id);
-                if (crime == null) throw new Exception("El crimen no existe");
+            Crime? crime = await this._crimeRepository.GetById(id);
+            if (crime == null) throw new NotFoundException("El crimen no existe");
 
-                Address? address = await this._addressRepository.GetById(crime.AddressId);
-                if (address == null) throw new Exception("La dirección asociada al crimen no existe");
-
-                this._addressRepository.Delete(address);
-                await this._addressRepository.SaveChanges();
-
-                this._crimeRepository.Delete(crime);
-
-                int rowsAffected = await this._crimeRepository.SaveChanges();
-                if(rowsAffected != 1) throw new Exception("No se pudo eliminar el crimen");
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            await this._crimeRepository.Delete(crime);
         }
         
-        public async Task<int> Solved(int idCrime)
+        public async Task Solved(int idCrime)
         {
-            int rowsAffected = 0;
-            try
-            {
-                if (idCrime <= 0) return 0;
-                Crime? crime = await this._crimeRepository.GetById(idCrime);
-                if (crime == null) throw new Exception("No se pudo encontrar el crimen");
+            Crime? crime = await this._crimeRepository.GetById(idCrime);
+            if (crime == null) throw new Exception("El crimen no existe");
 
-                crime.Status = true;
-                crime.DateEnd = DateTime.Now;
+            crime.Solved();
 
-                this._crimeRepository.Update(crime);
-                rowsAffected = await this._crimeRepository.SaveChanges();
-                if(rowsAffected != 1) throw new Exception("No se pudo actualizar el crimen");
+            await this._crimeRepository.Update(crime);
+        }
+
+        private async Task<List<UserResponse>> GetUsers(List<User> users) {
+            List<UserResponse> responses = new List<UserResponse>();
+                foreach (User model in users) {
+                    RoleResponse role = RoleMapper.ToResponse(model.Role);
+                    responses.Add(UserMapper.ToResponse(model, role));
+                }
+            return responses;
+        }
+
+        private async Task<List<CriminalResponse>> GetCriminals(List<Criminal> criminals) {
+            List<CriminalResponse> responses = new List<CriminalResponse>();
+            foreach (Criminal model in criminals) {
+                CriminalRiskLevelResponse risk = CriminalRiskLevelMapper.ToResponse(model.Risk);
+                responses.Add(CriminalMapper.ToResponse(model, risk));
             }
-            catch (Exception)
-            {
-                throw;
-            }
-            return rowsAffected;
+            return responses;
+        }
+
+        private async Task<CrimeResponse> GetCrime(Crime model) {
+            List<UserResponse> users = await this.GetUsers(model.Users);
+            List<CriminalResponse> criminals = await this.GetCriminals(model.Criminals);
+
+            AddressResponse address = AddressMapper.ToResponse(model.Address);
+            CrimeGradeResponse grade = CrimeGradeMapper.ToResponse(model.Grade);
+            CrimeTypeResponse type = CrimeTypeMapper.ToResponse(model.Type);
+
+            return CrimeMapper.ToResponse(model, address, criminals, users, grade, type);
         }
     }
 }

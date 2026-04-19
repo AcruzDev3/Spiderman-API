@@ -1,6 +1,5 @@
 ﻿using Domain.Enums;
 using Domain.Exceptions;
-
 namespace Domain.Models
 {
     public class Address
