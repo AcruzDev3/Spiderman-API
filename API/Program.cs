@@ -3,6 +3,7 @@ using Infrastructure.Extensions;
 using Application.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
+using API.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,8 @@ builder.Services.AddInfrastructure();
 
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionMiddleware>();
+
 //Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -30,7 +33,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
 
 app.MapControllers();

@@ -30,19 +30,19 @@ namespace API.Middlewares
 
             switch (ex) {
                 case NotFoundException:
-                statusCode = HttpStatusCode.NotFound;
+                statusCode = HttpStatusCode.NotFound; // 404
                 break;
 
                 case DomainValidationException:
-                statusCode = HttpStatusCode.BadRequest;
+                statusCode = HttpStatusCode.BadRequest; // 400
                 break;
 
                 case UnauthorizedException:
-                statusCode = HttpStatusCode.Unauthorized;
+                statusCode = HttpStatusCode.Unauthorized; // 401
                 break;
 
                 case InfrastructureException:
-                statusCode = HttpStatusCode.InternalServerError;
+                statusCode = HttpStatusCode.InternalServerError; // 500
                 break;
             }
 
