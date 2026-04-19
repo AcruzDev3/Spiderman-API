@@ -17,25 +17,34 @@ namespace Infrastructure.Repositories
         }
 
         public async Task<Crime?> GetById(int id) {
-            CrimeEntity? entity = await this._context.Crimes
-            .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.CrimeId == id);
+            try {
+                CrimeEntity? entity = await this._context.Crimes
+                                        .AsNoTracking()
+                                        .FirstOrDefaultAsync(c => c.CrimeId == id);
 
-            if(entity == null) return null;
-            else return await this.GetCrimeModel(entity);
+                if (entity == null) return null;
+                else return await this.GetCrimeModel(entity);
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al obtener el crimen con id {id} de la base de datos: {ex.Message}");
+            }
         }
 
         public async Task<List<Crime>?> GetAll() {
-            List<CrimeEntity> entites = await this._context.Crimes.AsNoTracking().ToListAsync();
+            try {
+                List<CrimeEntity> entites = await this._context.Crimes.AsNoTracking().ToListAsync();
 
-            List<Crime> crimes = new List<Crime>();
-            foreach (CrimeEntity entity in entites) crimes.Add(await GetCrimeModel(entity));
+                List<Crime> crimes = new List<Crime>();
+                foreach (CrimeEntity entity in entites) crimes.Add(await GetCrimeModel(entity));
 
-            return crimes;
+                return crimes;
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al obtener todos los crímenes de la base de datos: {ex.Message}");
+            }
         }
 
         public async Task<bool> Exists(Crime model) {
-            return await this._context.Crimes.AnyAsync(m =>
+            try {
+                return await this._context.Crimes.AnyAsync(m =>
                 m.Grade.Name.Equals(model.Grade.Name, StringComparison.OrdinalIgnoreCase) &&
                 m.Type.Name.Equals(model.Type.Name, StringComparison.OrdinalIgnoreCase) &&
                 m.DateStart == model.DateStart &&
@@ -43,93 +52,138 @@ namespace Infrastructure.Repositories
                 m.Status == model.Status &&
                 m.AddressId == model.Address.Id
             );
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al verificar la existencia del crimen en la base de datos: {ex.Message}");
+            }
+            
         }
 
         public async Task<CrimeGrade?> GetGradeByName(int gradeId) {
-            CrimeGradeEntity? entity = await this._context.CrimeGrades
+            try {
+                CrimeGradeEntity? entity = await this._context.CrimeGrades
                 .FirstOrDefaultAsync(m => m.CrimeGradeId == gradeId);
-            if(entity  == null) return null;
-            else return CrimeGradeMapper.ToDomain(entity);
+                if (entity == null) return null;
+                else return CrimeGradeMapper.ToDomain(entity);
+            } catch(Exception ex) {
+                throw new InfrastructureException($"Error al obtener el grado de crimen con id {gradeId} de la base de datos: {ex.Message}");
+            }
+            
         }
 
         public async Task<CrimeType?> GetTypeByName(int typeId) { 
-            CrimeTypeEntity? entity = await this._context.CrimeTypes
+            try {
+                CrimeTypeEntity? entity = await this._context.CrimeTypes
                 .FirstOrDefaultAsync(m => m.CrimeTypeId == typeId);
-            if (entity == null) return null;
-            else return CrimeTypeMapper.ToDomain(entity);
+                if (entity == null) return null;
+                else return CrimeTypeMapper.ToDomain(entity);
+            } catch(Exception ex) {
+                throw new InfrastructureException($"Error al obtener el tipo de crimen con id {typeId} de la base de datos: {ex.Message}");
+            }
         }
 
         public async Task Add(Crime crime) {
-            await this._context.Crimes.AddAsync(await this.GetCrimeEntity(crime));
-            int rowsAffected = await this._context.SaveChangesAsync();
-            if (rowsAffected != 1) throw new InfrastructureException("Error al añadir el crimen en la base de datos");
+            try {
+                await this._context.Crimes.AddAsync(await this.GetCrimeEntity(crime));
+                int rowsAffected = await this._context.SaveChangesAsync();
+                if (rowsAffected != 1) throw new InfrastructureException("Error al añadir el crimen en la base de datos");
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al añadir el crimen en la base de datos: {ex.Message}");
+            }
         }
             
         
         public async Task Update(Crime crime) {
-            this._context.Crimes.Update(await this.GetCrimeEntity(crime));
-            int rowsAffected = await this._context.SaveChangesAsync();
-            if (rowsAffected != 1) throw new InfrastructureException("Error al actualizar el crimen en la base de datos");
+            try {
+                this._context.Crimes.Update(await this.GetCrimeEntity(crime));
+                int rowsAffected = await this._context.SaveChangesAsync();
+                if (rowsAffected != 1) throw new InfrastructureException("Error al actualizar el crimen en la base de datos");
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al actualizar el crimen en la base de datos: {ex.Message}");
+            }
         }
             
         public async Task Delete(Crime crime) {
-            this._context.Crimes.Remove(await this.GetCrimeEntity(crime));
-            int rowsAffected = await this._context.SaveChangesAsync();
-            if (rowsAffected != 1) throw new InfrastructureException("Error al eliminar el crimen en la base de datos");
-
+            try {
+                this._context.Crimes.Remove(await this.GetCrimeEntity(crime));
+                int rowsAffected = await this._context.SaveChangesAsync();
+                if (rowsAffected != 1) throw new InfrastructureException("Error al eliminar el crimen en la base de datos");
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al eliminar el crimen en la base de datos: {ex.Message}");
+            }
         }
            
         public async Task DeleteRange(List<Crime> models) {
-            List<CrimeEntity> entities = new List<CrimeEntity>();
+            try {
+                List<CrimeEntity> entities = new List<CrimeEntity>();
 
-            foreach (Crime model in models) entities.Add(await this.GetCrimeEntity(model));
-                
-            this._context.Crimes.RemoveRange(entities);
-            int rowsAffected = await this._context.SaveChangesAsync();
-            if(rowsAffected == 0) throw new InfrastructureException("Error al eliminar los crímenes en la base de datos");
+                foreach (Crime model in models) entities.Add(await this.GetCrimeEntity(model));
+
+                this._context.Crimes.RemoveRange(entities);
+                int rowsAffected = await this._context.SaveChangesAsync();
+                if (rowsAffected == 0) throw new InfrastructureException("Error al eliminar los crímenes en la base de datos");
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al eliminar los crímenes en la base de datos: {ex.Message}");
+            }
         }
 
         private async Task<List<UserEntity>> GetUsersOfCrime(List<User> users) {
-            List<UserEntity> userEntities = new List<UserEntity>();
-            
-            foreach (User user in users) userEntities.Add(UserMapper.ToEntity(user));
+            try {
+                List<UserEntity> userEntities = new List<UserEntity>();
 
-            return userEntities;
+                foreach (User user in users) userEntities.Add(UserMapper.ToEntity(user));
+
+                return userEntities;
+            } catch(Exception ex) {
+                throw new InfrastructureException($"Error al obtener los héroes del crimen de la base de datos: {ex.Message}");
+            }
         }
 
         private async Task<List<CriminalEntity>> GetCriminalOfCrime(List<Criminal> criminals) {
-            List<CriminalEntity> criminalEntities = new List<CriminalEntity>();
+            try {
+                List<CriminalEntity> criminalEntities = new List<CriminalEntity>();
 
-            foreach (Criminal criminal in criminals) criminalEntities.Add(CriminalMapper.ToEntity(criminal));
+                foreach (Criminal criminal in criminals) criminalEntities.Add(CriminalMapper.ToEntity(criminal));
 
-            return criminalEntities;
+                return criminalEntities;
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al obtener los criminales del crimen de la base de datos: {ex.Message}");
+            }
+            
         }
 
         private async Task<CrimeEntity> GetCrimeEntity(Crime crime) {
-            List<UserEntity> userEntities = await GetUsersOfCrime(crime.Users);
-            List<CriminalEntity> criminalEntities = await GetCriminalOfCrime(crime.Criminals);
+            try {
+                List<UserEntity> userEntities = await GetUsersOfCrime(crime.Users);
+                List<CriminalEntity> criminalEntities = await GetCriminalOfCrime(crime.Criminals);
 
-            return CrimeMapper.ToEntity(crime, userEntities, criminalEntities);
+                return CrimeMapper.ToEntity(crime, userEntities, criminalEntities);
+            } catch(Exception ex) {
+                throw new InfrastructureException($"Error al obtener la entidad del crimen de la base de datos: {ex.Message}");
+            }
         }
 
         private async Task<Crime> GetCrimeModel(CrimeEntity entity) {
-            CrimeGrade grade = CrimeGradeMapper.ToDomain(entity.Grade);
-            CrimeType type = CrimeTypeMapper.ToDomain(entity.Type);
-            Address address = AddressMapper.ToDomain(entity.Address);
+            try {
+                CrimeGrade grade = CrimeGradeMapper.ToDomain(entity.Grade);
+                CrimeType type = CrimeTypeMapper.ToDomain(entity.Type);
+                Address address = AddressMapper.ToDomain(entity.Address);
 
-            List<User> users = new List<User>();
-            foreach (UserEntity userEntity in entity.Heroes) {
-                Role role = RoleMapper.ToDomain(userEntity.Role);
-                users.Add(UserMapper.ToDomain(userEntity, role));
+                List<User> users = new List<User>();
+                foreach (UserEntity userEntity in entity.Heroes) {
+                    Role role = RoleMapper.ToDomain(userEntity.Role);
+                    users.Add(UserMapper.ToDomain(userEntity, role));
+                }
+
+                List<Criminal> criminals = new List<Criminal>();
+                foreach (CriminalEntity criminalEntity in entity.Criminals) {
+                    CriminalRiskLevel risk = CriminalRiskLevelMapper.ToDomain(criminalEntity.Risk);
+                    criminals.Add(CriminalMapper.ToDomain(criminalEntity, risk));
+                }
+
+                return CrimeMapper.ToDomain(entity, users, criminals, address, grade, type);
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al obtener el modelo del crimen de la base de datos: {ex.Message}");
             }
-
-            List<Criminal> criminals = new List<Criminal>();
-            foreach (CriminalEntity criminalEntity in entity.Criminals) {
-                CriminalRiskLevel risk = CriminalRiskLevelMapper.ToDomain(criminalEntity.Risk);
-                criminals.Add(CriminalMapper.ToDomain(criminalEntity, risk));
-            }
-
-            return CrimeMapper.ToDomain(entity, users, criminals, address, grade, type);
         }
     }
 }

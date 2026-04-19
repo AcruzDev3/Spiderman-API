@@ -16,109 +16,120 @@ namespace Infrastructure.Repositories
         }
 
         public async Task<User?> GetById(int id) {
-            UserEntity? entity = await this._context.Users
+            try {
+                UserEntity? entity = await this._context.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.UserId == id);
 
-            if (entity == null) return null;
+                if (entity == null) return null;
 
-            return await this.GetUserModel(entity);
+                return await this.GetUserModel(entity);
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al obtener el usuario con id {id} de la base de datos: {ex.Message}");
+            }
         }
 
         public async Task<List<User>?> GetByIds(List<int> ids) {
-            List<UserEntity> entities = await this._context.Users
+            try {
+                List<UserEntity> entities = await this._context.Users
                 .Where(u => ids.Contains(u.UserId))
                 .ToListAsync();
-            List<User> users = new List<User>();
-            foreach (UserEntity entity in entities) users.Add(await this.GetUserModel(entity));
-            return users;
+                List<User> users = new List<User>();
+                foreach (UserEntity entity in entities) users.Add(await this.GetUserModel(entity));
+                return users;
+            } catch(Exception ex) {
+                throw new InfrastructureException($"Error al obtener los usuarios con ids {string.Join(", ", ids)} de la base de datos: {ex.Message}");
+            }
         }
 
         public async Task<List<User>> GetAll() {
-            List<UserEntity> entities = await this._context.Users
+            try {
+                List<UserEntity> entities = await this._context.Users
                                     .ToListAsync();
-            List<User> users = new List<User>();
-            foreach (UserEntity entity in entities) users.Add(await this.GetUserModel(entity));
-            return users;
+                List<User> users = new List<User>();
+                foreach (UserEntity entity in entities) users.Add(await this.GetUserModel(entity));
+                return users;
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al obtener todos los usuarios de la base de datos: {ex.Message}");
+            }
         }
 
         public async Task<List<Crime>?> GetCrimes(User model) {
-            List<CrimeEntity> crimesEntities = await _context.Crimes
-                .Where(c => c.Heroes.Any(u => u.UserId == model.Id))
-                .ToListAsync();
-            List<Crime> crimes = new List<Crime>();
-
-            foreach (CrimeEntity entity in crimesEntities) {
-                List<Criminal> criminals = GetCriminalsOfCrime(entity.Criminals.ToList());
-                List<User> heroes = GetHeroesOfCrime(entity.Heroes.ToList());
-                Address addres = AddressMapper.ToDomain(entity.Address);
-                CrimeGrade grade = CrimeGradeMapper.ToDomain(entity.Grade);
-                CrimeType type = CrimeTypeMapper.ToDomain(entity.Type);
-                
-                crimes.Add(CrimeMapper.ToDomain(entity, heroes, criminals, addres, grade, type));
+            try {
+                List<CrimeEntity> crimesEntities = await _context.Crimes
+                    .Where(c => c.Heroes.Any(u => u.UserId == model.Id))
+                    .ToListAsync();
+                List<Crime> crimes = new List<Crime>();
+                return crimes;
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al obtener los crímenes del usuario con id {model.Id} de la base de datos: {ex.Message}");
             }
-
-            return crimes;
         }
 
         public async Task Add(User model) {
-            await this._context.Users.AddAsync(UserMapper.ToEntity(model));
-            int rowsAffected = await this._context.SaveChangesAsync();
-            if(rowsAffected != 1) throw new InfrastructureException("Error al añadir el usuario a la base de datos");
+            try {
+                await this._context.Users.AddAsync(UserMapper.ToEntity(model));
+                int rowsAffected = await this._context.SaveChangesAsync();
+                if (rowsAffected != 1) throw new InfrastructureException("Error al añadir el usuario a la base de datos");
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al añadir el usuario a la base de datos: {ex.Message}");
+            }
         }
 
         public async Task Update(User model) {
-            this._context.Users.Update(UserMapper.ToEntity(model));
-            int rowsAffected = await this._context.SaveChangesAsync();
-            if (rowsAffected != 1) throw new InfrastructureException("Error al actualizar el usuario a la base de datos");
+            try {
+                this._context.Users.Update(UserMapper.ToEntity(model));
+                int rowsAffected = await this._context.SaveChangesAsync();
+                if (rowsAffected != 1) throw new InfrastructureException("Error al actualizar el usuario a la base de datos");
+            } catch(Exception ex) {
+                throw new InfrastructureException($"Error al actualizar el usuario con id {model.Id} en la base de datos: {ex.Message}");
+            }
         }
 
         public async Task Delete(User model) {
-            this._context.Users.Remove(UserMapper.ToEntity(model));
-            int rowsAffected = await this._context.SaveChangesAsync();
-            if (rowsAffected != 1) throw new InfrastructureException("Error al eliminar el usuario a la base de datos");
+            try {
+                this._context.Users.Remove(UserMapper.ToEntity(model));
+                int rowsAffected = await this._context.SaveChangesAsync();
+                if (rowsAffected != 1) throw new InfrastructureException("Error al eliminar el usuario a la base de datos");
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al eliminar el usuario con id {model.Id} de la base de datos: {ex.Message}");
+            }
+            
         }
 
         public async Task<bool> Exists(string email) {
-            UserEntity? entity = this._context.Users
-                .AsNoTracking()
-                .FirstOrDefault(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
-            if (entity == null) return false;
-            else return true;
+            try {
+                UserEntity? entity = this._context.Users
+               .AsNoTracking()
+               .FirstOrDefault(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+                if (entity == null) return false;
+                else return true;
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al verificar la existencia del usuario con email {email} en la base de datos: {ex.Message}");
+            }
+           
         }
 
         public async Task<Role?> GetRoleAsync(int idRole) {
-            RoleEntity? entity = await _context.Roles
+            try {
+                RoleEntity? entity = await _context.Roles
                 .AsNoTracking()
                 .FirstOrDefaultAsync(r => r.RoleId == idRole);
 
-            if (entity == null) return null;
-            else return RoleMapper.ToDomain(entity);
-        }
-
-        private List<Criminal> GetCriminalsOfCrime(List<CriminalEntity> criminalsEntities) {
-            List<Criminal> criminals = new List<Criminal>();
-
-            foreach (CriminalEntity criminal in criminalsEntities) {
-                CriminalRiskLevel risk = CriminalRiskLevelMapper.ToDomain(criminal.Risk);
-                criminals.Add(CriminalMapper.ToDomain(criminal, risk));
+                if (entity == null) return null;
+                else return RoleMapper.ToDomain(entity);
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al obtener el rol con id {idRole} de la base de datos: {ex.Message}");
             }
-            return criminals;
-        }
-
-        private List<User> GetHeroesOfCrime(List<UserEntity> usersEntities) {
-            List<User> users = new List<User>();
-
-            foreach (UserEntity user in usersEntities) {
-                Role role = RoleMapper.ToDomain(user.Role);
-                users.Add(UserMapper.ToDomain(user, role));
-            }
-            return users;
         }
 
         private async Task<User> GetUserModel(UserEntity entity) {
-            Role role = RoleMapper.ToDomain(entity.Role);
-            return UserMapper.ToDomain(entity, role);
+            try {
+                Role role = RoleMapper.ToDomain(entity.Role);
+                return UserMapper.ToDomain(entity, role);
+            } catch(Exception ex) {
+                throw new InfrastructureException($"Error al mapear el usuario con id {entity.UserId} de la base de datos: {ex.Message}");
+            }
         }
     }
 }

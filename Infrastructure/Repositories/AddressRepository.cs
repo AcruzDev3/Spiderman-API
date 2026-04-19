@@ -15,20 +15,29 @@ namespace Infrastructure.Repositories
         }
 
         public async Task<Address?> GetById(int id) {
-            AddressEntity? entity = await this._context.Addresses
-                .AsNoTracking()
-                .FirstOrDefaultAsync(a => a.AddressId == id);
-            if (entity == null) return null;
-            else return AddressMapper.ToDomain(entity);
+            try {
+                AddressEntity? entity = await this._context.Addresses
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(a => a.AddressId == id);
+                if (entity == null) return null;
+                else return AddressMapper.ToDomain(entity);
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al obtener la dirección con id {id} de la base de datos: {ex.Message}");
+            }
+            
         }
 
         public async Task<List<Address>?> GetAll() {
-            List<AddressEntity> entities = await this._context.Addresses.ToListAsync();
+            try {
+                List<AddressEntity> entities = await this._context.Addresses.ToListAsync();
 
-            List<Address> addresses = new List<Address>();
-            foreach(AddressEntity entity in entities) addresses.Add(AddressMapper.ToDomain(entity));
+                List<Address> addresses = new List<Address>();
+                foreach (AddressEntity entity in entities) addresses.Add(AddressMapper.ToDomain(entity));
 
-            return addresses;
+                return addresses;
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al obtener todas las direcciones de la base de datos: {ex.Message}");
+            }
         }
 
         public async Task<bool> Exists(Address model) {
@@ -41,27 +50,39 @@ namespace Infrastructure.Repositories
                 );
                 if (entity == null) return false;
                 else return true;
-            } catch (Exception) {
-                throw;
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al verificar la existencia de la dirección en la base de datos: {ex.Message}");
             }
         }
 
         public async Task Add(Address address) {
-            await this._context.Addresses.AddAsync(AddressMapper.ToEntity(address));
-            int rowsAffected = await this._context.SaveChangesAsync();
-            if (rowsAffected != 1) throw new InfrastructureException("Error al añadir la dirección en la base de datos");
+            try {
+                await this._context.Addresses.AddAsync(AddressMapper.ToEntity(address));
+                int rowsAffected = await this._context.SaveChangesAsync();
+                if (rowsAffected != 1) throw new InfrastructureException("Error al añadir la dirección en la base de datos");
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al añadir la dirección en la base de datos: {ex.Message}");
+            }
         }
 
         public async Task Update(Address address) {
-            this._context.Addresses.Update(AddressMapper.ToEntity(address));
-            int rowsAffected = await this._context.SaveChangesAsync();
-            if (rowsAffected != 1) throw new InfrastructureException("Error al actualizar la dirección en la base de datos");
+            try {
+                this._context.Addresses.Update(AddressMapper.ToEntity(address));
+                int rowsAffected = await this._context.SaveChangesAsync();
+                if (rowsAffected != 1) throw new InfrastructureException("Error al actualizar la dirección en la base de datos");
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al actualizar la dirección en la base de datos: {ex.Message}");
+            }
         }
 
         public async Task Delete(Address address) {
-            this._context.Addresses.Remove(AddressMapper.ToEntity(address));
-            int rowsAffected = await this._context.SaveChangesAsync();
-            if (rowsAffected != 1) throw new InfrastructureException("Error al eliminar la dirección en la base de datos");
+            try {
+                this._context.Addresses.Remove(AddressMapper.ToEntity(address));
+                int rowsAffected = await this._context.SaveChangesAsync();
+                if (rowsAffected != 1) throw new InfrastructureException("Error al eliminar la dirección en la base de datos");
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al eliminar la dirección en la base de datos: {ex.Message}");
+            }
         }
     }
 }
