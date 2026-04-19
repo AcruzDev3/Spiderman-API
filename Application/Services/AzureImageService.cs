@@ -10,7 +10,7 @@ using SixLabors.ImageSharp.Processing;
 
 namespace Application.Services
 {
-    public class AzureImageService : IImageStorageService
+    public class AzureImageService : IAzureImageService
     {
         private readonly BlobContainerClient _containerClient;
         private readonly int _maxWidth;
