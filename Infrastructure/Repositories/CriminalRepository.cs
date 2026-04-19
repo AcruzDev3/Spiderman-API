@@ -144,8 +144,8 @@ namespace Infrastructure.Repositories
                 this._context.Criminals.Remove(CriminalMapper.ToEntity(criminal));
                 int rowsAffected = await this._context.SaveChangesAsync();
                 if (rowsAffected != 1) throw new InfrastructureException("Error al eliminar el criminal en base de datos");
-            } catch (Exception ex) { 
-                throw new InfrastructureException($"Error al eliminar el criminal con id {criminal.Id} en la base de datos: {ex.Message}")
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al eliminar el criminal con id {criminal.Id} en la base de datos: {ex.Message}");
             }
             
         }
