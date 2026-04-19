@@ -1,42 +1,52 @@
-﻿//using LIB.Managers;
-//using LIB.ViewModels;
+﻿using Application;
+using Application.Constans;
+using Application.Contracts.Requests.User;
+using Application.Contracts.Responses;
+using Application.Enums;
+using Application.Interfaces.IServices;
+using Application.Interfaces.Services;
+using Microsoft.AspNetCore.Mvc;
 
-//using Microsoft.AspNetCore.Mvc;
+namespace API.Controllers
+{
+    [ApiController, Route("[controller]")]
+    public class UserController : Controller
+    {
+        private readonly IUserService _userService;
+        private readonly IAzureImageService _azureImageService;
+        public UserController(IUserService userService, IAzureImageService azureService) {
+            this._userService = userService;
+            this._azureImageService = azureService;
+        }
 
-//namespace API.Controllers
-//{
-//    [ApiController, Route("[controller]")]
-//    public class HeroCrimeController : Controller
-//    {
-//        private readonly HeroCrimeManager _heroCrimeManager;
-//        public HeroCrimeController(HeroCrimeManager heroCrimeManager)
-//        {
-//            _heroCrimeManager = heroCrimeManager;
-//        }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id) {
+            UserResponse viewModel = await this._userService.GetById(id);
+            return Ok(viewModel);
+        }
 
-//        [HttpGet, Route("GetAll")]
-//        public async Task<IActionResult> Index()
-//        {
-//            List<HeroCrimeViewModel> viewModels = await _heroCrimeManager.Get();
-//            return Ok(viewModels);
-//        }
+        [HttpGet]
+        public async Task<IActionResult> Index() {
+            List<UserResponse> viewModels = await this._userService.GetAll();
+            return Ok(viewModels);
+        }
 
-//        [HttpPost, Route("Assign")]
-//        public async Task<IActionResult> Assign(int idCrime, int idHero)
-//        {
-//            try
-//            {
-//                if (idCrime <= 0 || idHero <= 0) return BadRequest("The hero can't assign to the crime");
-               
-//                int response = await _heroCrimeManager.Create(idCrime, idHero);
-//                if (response == 2) return BadRequest("The hero is already assign to this crime");
-//                else if (response != 1) return BadRequest("The hero can't assign to the crime");
-//            }
-//            catch(Exception ex)
-//            {
-//                return BadRequest("The hero can't assign to the crime");
-//            }
-//            return Ok("The hero is assign to the crime");
-//        }
-//    }
-//}
+        [HttpPost]
+        public async Task<IActionResult> Create(CreateUserRequest request) {
+            UserResponse user = null;
+
+            if(request.Image != null) {
+                string urlImage = await this._azureImageService.UploadImageAsync(
+                    request.Image.OpenReadStream(),
+                    FolderImageEnum.Users.ToString().ToLower(),
+                    request.Image.ContentType
+                );
+                user = await this._userService.Create(request, urlImage);
+            } else {
+                user = await this._userService.Create(request, DefaultImagesPath.User);
+            }
+
+            return CreatedAtAction(nameof(GetById), user);
+        }
+    }
+}

@@ -7,8 +7,8 @@ namespace Application.Interfaces.Services
     {
         Task<UserResponse> GetById(int id);
         Task<List<UserResponse>> GetAll();
-        Task Create(CreateUserRequest request, string pathImageProfile);
-        Task Update(UpdateUserRequest request, string pathImageProfile);
+        Task<UserResponse> Create(CreateUserRequest request, string pathImageProfile);
+        Task<UserResponse> Update(UpdateUserRequest request, string pathImageProfile);
         Task Delete(int id);
     }
 }

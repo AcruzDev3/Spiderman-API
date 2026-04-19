@@ -66,21 +66,25 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task Add(User model) {
+        public async Task<User> Add(User model) {
             try {
-                await this._context.Users.AddAsync(UserMapper.ToEntity(model));
+                UserEntity entity = UserMapper.ToEntity(model);
+                await this._context.Users.AddAsync(entity);
                 int rowsAffected = await this._context.SaveChangesAsync();
                 if (rowsAffected != 1) throw new InfrastructureException("Error al añadir el usuario a la base de datos");
+                return UserMapper.ToDomain(entity, RoleMapper.ToDomain(entity.Role));
             } catch (Exception ex) {
                 throw new InfrastructureException($"Error al añadir el usuario a la base de datos: {ex.Message}");
             }
         }
 
-        public async Task Update(User model) {
+        public async Task<User> Update(User model) {
             try {
-                this._context.Users.Update(UserMapper.ToEntity(model));
+                UserEntity entity = UserMapper.ToEntity(model);
+                this._context.Users.Update(entity);
                 int rowsAffected = await this._context.SaveChangesAsync();
                 if (rowsAffected != 1) throw new InfrastructureException("Error al actualizar el usuario a la base de datos");
+                return UserMapper.ToDomain(entity, RoleMapper.ToDomain(entity.Role));
             } catch(Exception ex) {
                 throw new InfrastructureException($"Error al actualizar el usuario con id {model.Id} en la base de datos: {ex.Message}");
             }

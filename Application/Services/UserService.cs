@@ -38,18 +38,22 @@ namespace Application.Services
             return viewModels;
         }
 
-        public async Task Create(CreateUserRequest request, string pathImageProfile) {
+        public async Task<UserResponse> Create(CreateUserRequest request, string pathImageProfile) {
             Role? role = await this._userRepository.GetRoleAsync(request.RoleId);
             if (role == null) throw new NotFoundException("El rol del usuario no existe");
 
             User model = UserMapper.ToModel(request, role, pathImageProfile);
 
             if (await this._userRepository.Exists(model.Email)) 
+                throw new Exception("El correo electrónico ya está registrado");
 
-            await this._userRepository.Add(model);
+            return UserMapper.ToResponse(
+                await this._userRepository.Add(model),
+                RoleMapper.ToResponse(role)
+            );
         }
 
-        public async Task Update(UpdateUserRequest request, string pathImageProfile) {
+        public async Task<UserResponse> Update(UpdateUserRequest request, string pathImageProfile) {
             Role? role = await this._userRepository.GetRoleAsync(request.RoleId);
             if (role == null) throw new NotFoundException("El rol del usuario no existe");
 
@@ -57,8 +61,11 @@ namespace Application.Services
             if(user == null) throw new NotFoundException("El usuario no existe");
 
             User newUser = UserMapper.ToModel(request, role, user.Password, pathImageProfile);
-                
-            await this._userRepository.Update(newUser);
+
+            return UserMapper.ToResponse(
+                await this._userRepository.Update(newUser),
+                RoleMapper.ToResponse(role)
+            );
         }
         // TODO
         public async Task ChangePassword() {
