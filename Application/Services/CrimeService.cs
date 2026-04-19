@@ -1,12 +1,10 @@
-﻿
-using Application.Contracts.Requests.Crime;
+﻿using Application.Contracts.Requests.Crime;
 using Application.Contracts.Responses;
 using Application.Exceptions;
 using Application.Interfaces.Services;
 using Application.Mappers;
 using Domain.Interfaces.IRepositories;
 using Domain.Models;
-using System.Linq.Expressions;
 
 namespace Application.Services
 {
@@ -60,7 +58,6 @@ namespace Application.Services
             if (address == null) throw new NotFoundException("La dirección no es válida");
 
             Crime model = CrimeMapper.ToModel(request, address, criminals, users, grade, type);
-            if (model == null) throw new ValidationException("El crimen no es válido");
 
             await this._crimeRepository.Add(model);
         }
@@ -82,7 +79,6 @@ namespace Application.Services
             if (address == null) throw new NotFoundException("La dirección no es válida");
 
             Crime model = CrimeMapper.ToModel(request, address, criminals, users, grade, type);
-            if (model == null) throw new ValidationException("El crimen no es válido");
 
             await this._crimeRepository.Update(model);
         }

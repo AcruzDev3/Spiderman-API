@@ -43,10 +43,8 @@ namespace Application.Services
             if (role == null) throw new NotFoundException("El rol del usuario no existe");
 
             User model = UserMapper.ToModel(request, role, pathImageProfile);
-            if (model == null) throw new ValidationException("El usuario no es válido");
 
             if (await this._userRepository.Exists(model.Email)) 
-                throw new ValidationException("El usuario ya existe");
 
             await this._userRepository.Add(model);
         }

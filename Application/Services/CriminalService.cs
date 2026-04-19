@@ -46,8 +46,7 @@ namespace Application.Services
             if (riskLevel == null) throw new NotFoundException("El nivel de riesgo no es válido");
 
             Criminal model = CriminalMapper.ToModel(request, riskLevel, pathImageProfile);
-            if(await this._criminalRepository.Exists(request.Name)) 
-                throw new ValidationException("El criminal ya existe");
+            if(await this._criminalRepository.Exists(request.Name))
 
             await this._criminalRepository.Add(model);
         }
@@ -57,7 +56,6 @@ namespace Application.Services
             if (riskLevel == null) throw new NotFoundException("El nivel de riesgo no es válido");
 
             Criminal? model = await this._criminalRepository.GetById(request.Id);
-                if (model == null) throw new ValidationException("El criminal no existe");
 
             Criminal newUser = CriminalMapper.ToModel(request, riskLevel, pathImageProfile);
             await this._criminalRepository.Update(model);
@@ -70,7 +68,7 @@ namespace Application.Services
 
             List<Crime>? crimes = await this._criminalRepository.GetCrimes(criminal);
                 
-            this._criminalRepository.Delete(criminal);
+            await this._criminalRepository.Delete(criminal);
                 
             if (crimes == null) return;
             List<Crime>? crimesWithoutCriminals = crimes

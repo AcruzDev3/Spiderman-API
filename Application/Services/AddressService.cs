@@ -37,7 +37,6 @@ namespace Application.Services
         public async Task Create(CreateAddressRequest request, string image)
         {
             Address model = AddressMapper.ToModel(request, image);
-            if (model == null) throw new ValidationException("La dirección no es válida");
 
             await this._addressRepository.Add(model);
         }
@@ -48,7 +47,6 @@ namespace Application.Services
             if(model == null) throw new NotFoundException("La dirección no existe");
 
             Address newAddress = AddressMapper.ToModel(request, image);
-            if (model == null) throw new ValidationException("La dirección no es válida");
 
             await this._addressRepository.Update(model);
         }

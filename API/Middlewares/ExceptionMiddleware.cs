@@ -33,10 +33,6 @@ namespace API.Middlewares
                 statusCode = HttpStatusCode.NotFound;
                 break;
 
-                case ValidationException:
-                statusCode = HttpStatusCode.UnprocessableEntity;
-                break;
-
                 case DomainValidationException:
                 statusCode = HttpStatusCode.BadRequest;
                 break;
