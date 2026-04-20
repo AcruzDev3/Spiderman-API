@@ -80,12 +80,14 @@ namespace Application.Services
             if(user == null) throw new NotFoundException("El usuario no existe");
 
             string urlImage = user.Image;
+
             if (request.Image != null) {
                 urlImage = await this._azureImageService.UploadImageAsync(
                     request.Image.OpenReadStream(),
                     FolderImageEnum.Users.ToString().ToLower(),
                     request.Image.ContentType
                 );
+                await this._azureImageService.DeleteAsync(user.Image);
             }
 
             User newUser = UserMapper.ToModel(request, role, user.Password, urlImage);
@@ -96,8 +98,6 @@ namespace Application.Services
             );
         }
 
-
-        // TODO
         public async Task ChangePassword(ChangePasswordRequest request) {
             User? user = await this._userRepository.GetById(request.UserId);
             if(user == null) throw new NotFoundException("El usuario no existe");
