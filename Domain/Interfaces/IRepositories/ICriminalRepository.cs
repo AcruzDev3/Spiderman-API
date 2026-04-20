@@ -10,8 +10,8 @@ namespace Domain.Interfaces.IRepositories
         Task<List<Crime>?> GetCrimes(Criminal model);
         Task<CriminalRiskLevel?> GetCriminalRiskLevelAsync(int RiskId);
         Task<bool> Exists(string name);
-        Task Add(Criminal criminal);
-        Task Update(Criminal criminal);
+        Task<Criminal> Add(Criminal criminal);
+        Task<Criminal> Update(Criminal criminal);
         Task Delete(Criminal criminal);
     }
 }

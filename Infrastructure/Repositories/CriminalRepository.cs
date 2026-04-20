@@ -119,21 +119,35 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task Add(Criminal criminal) {
+        public async Task<Criminal> Add(Criminal criminal) {
             try {
-                await this._context.Criminals.AddAsync(CriminalMapper.ToEntity(criminal));
+                CriminalEntity? entity = CriminalMapper.ToEntity(criminal);
+                await this._context.Criminals.AddAsync(entity);
+                
                 int rowsAffected = await this._context.SaveChangesAsync();
                 if (rowsAffected != 1) throw new InfrastructureException("Error al añadir el criminal en base de datos");
+
+                return CriminalMapper.ToDomain(
+                    entity,
+                    CriminalRiskLevelMapper.ToDomain(entity.Risk)
+                );
             } catch (Exception ex) {
                 throw new InfrastructureException($"Error al añadir el criminal con id {criminal.Id} en la base de datos: {ex.Message}");
             }
         }
 
-        public async Task Update(Criminal criminal) {
+        public async Task<Criminal> Update(Criminal criminal) {
             try {
-                this._context.Criminals.Update(CriminalMapper.ToEntity(criminal));
+                CriminalEntity entity = CriminalMapper.ToEntity(criminal);
+                this._context.Criminals.Update(entity);
+
                 int rowsAffected = await this._context.SaveChangesAsync();
                 if (rowsAffected != 1) throw new InfrastructureException("Error al actualizar el criminal en base de datos");
+
+                return CriminalMapper.ToDomain(
+                    entity,
+                    CriminalRiskLevelMapper.ToDomain(entity.Risk)
+                );
             } catch(Exception ex) {
                 throw new InfrastructureException($"Error al actualizar el criminal con id {criminal.Id} en la base de datos: {ex.Message}");
             }
