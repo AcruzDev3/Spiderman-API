@@ -1,6 +1,10 @@
-﻿using Application.Contracts.Requests.User;
+﻿using Application.Constans;
+using Application.Contracts.Requests.User;
 using Application.Contracts.Responses;
+using Application.Enums;
 using Application.Exceptions;
+using Application.Interfaces;
+using Application.Interfaces.IServices;
 using Application.Interfaces.Services;
 using Application.Mappers;
 using Domain.Interfaces.IRepositories;
@@ -12,9 +16,14 @@ namespace Application.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly ICrimeRepository _crimeRepository;
-        public UserService(IUserRepository userRepository, ICrimeRepository crimeRepository) {
+        private readonly IAzureImageService _azureImageService;
+        private readonly IPasswordHasher _passwordHasher;
+        public UserService(IUserRepository userRepository, ICrimeRepository crimeRepository,
+            IAzureImageService azureImageService, IPasswordHasher passwordHasher) {
             this._userRepository = userRepository;
             this._crimeRepository = crimeRepository;
+            this._azureImageService = azureImageService;
+            this._passwordHasher = passwordHasher;
         }
 
         public async Task<UserResponse> GetById(int id) {
@@ -38,11 +47,21 @@ namespace Application.Services
             return viewModels;
         }
 
-        public async Task<UserResponse> Create(CreateUserRequest request, string pathImageProfile) {
+        public async Task<UserResponse> Create(CreateUserRequest request) {
             Role? role = await this._userRepository.GetRoleAsync(request.RoleId);
             if (role == null) throw new NotFoundException("El rol del usuario no existe");
 
-            User model = UserMapper.ToModel(request, role, pathImageProfile);
+            string urlImage = DefaultImagesPath.User;
+            if (request.Image != null) {
+                urlImage = await this._azureImageService.UploadImageAsync(
+                    request.Image.OpenReadStream(),
+                    FolderImageEnum.Users.ToString().ToLower(),
+                    request.Image.ContentType
+                );
+            }
+
+            request.Password = this._passwordHasher.Hash(request.Password);
+            User model = UserMapper.ToModel(request, role, urlImage);
 
             if (await this._userRepository.Exists(model.Email)) 
                 throw new Exception("El correo electrónico ya está registrado");
@@ -53,28 +72,46 @@ namespace Application.Services
             );
         }
 
-        public async Task<UserResponse> Update(UpdateUserRequest request, string pathImageProfile) {
+        public async Task<UserResponse> Update(UpdateUserRequest request) {
             Role? role = await this._userRepository.GetRoleAsync(request.RoleId);
             if (role == null) throw new NotFoundException("El rol del usuario no existe");
 
             User? user = await this._userRepository.GetById(request.Id);
             if(user == null) throw new NotFoundException("El usuario no existe");
 
-            User newUser = UserMapper.ToModel(request, role, user.Password, pathImageProfile);
+            string urlImage = user.Image;
+            if (request.Image != null) {
+                urlImage = await this._azureImageService.UploadImageAsync(
+                    request.Image.OpenReadStream(),
+                    FolderImageEnum.Users.ToString().ToLower(),
+                    request.Image.ContentType
+                );
+            }
+
+            User newUser = UserMapper.ToModel(request, role, user.Password, urlImage);
 
             return UserMapper.ToResponse(
                 await this._userRepository.Update(newUser),
                 RoleMapper.ToResponse(role)
             );
         }
+
+
         // TODO
-        public async Task ChangePassword() {
-            
+        public async Task ChangePassword(ChangePasswordRequest request) {
+            User? user = await this._userRepository.GetById(request.UserId);
+            if(user == null) throw new NotFoundException("El usuario no existe");
+
+            if(!request.NewPassword.Equals(request.ConfirmPassword)) 
+                throw new Exception("Las contraseñas no coinciden");
+
+            user.ChangePassword(this._passwordHasher.Hash(request.NewPassword)); 
+            await this._userRepository.Update(user);
         }
 
         public async Task Delete(int id) {
             User? user = await this._userRepository.GetById(id);
-            if (user == null) throw new Exception("El usuario no existe");
+            if (user == null) throw new NotFoundException("El usuario no existe");
 
             List<Crime>? crimes = await this._userRepository.GetCrimes(user);
                 

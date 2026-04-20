@@ -62,5 +62,9 @@ namespace Domain.Models
             if (image.Length > 200) throw new DomainValidationException("La imagen no puede ser mayor a 300 caracteres");
             this.Image = image;
         }
+
+        public void ChangePassword(string password) {
+            this.Password = password;
+        }
     }
 }
