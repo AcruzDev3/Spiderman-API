@@ -8,8 +8,8 @@ namespace Application.Interfaces.Services
     {
         Task<AddressResponse> GetById(int id);
         Task<List<AddressResponse>> GetAll();
-        Task Create(CreateAddressRequest request, string image);
-        Task Update(UpdateAddressRequest request, string image);
+        Task<AddressResponse> Create(CreateAddressRequest request);
+        Task<AddressResponse> Update(UpdateAddressRequest request);
         Task Delete(int id);
     }
 }

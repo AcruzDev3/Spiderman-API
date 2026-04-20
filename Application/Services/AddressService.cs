@@ -1,6 +1,9 @@
-﻿using Application.Contracts.Requests.Address;
+﻿using Application.Constans;
+using Application.Contracts.Requests.Address;
 using Application.Contracts.Responses;
+using Application.Enums;
 using Application.Exceptions;
+using Application.Interfaces.IServices;
 using Application.Interfaces.Services;
 using Application.Mappers;
 using Domain.Interfaces.IRepositories;
@@ -11,9 +14,11 @@ namespace Application.Services
     public class AddressService: IAddressService
     {
         private readonly IAddressRepository _addressRepository;
-        public AddressService(IAddressRepository addressRepository)
+        private readonly IAzureImageService _azureImageService;
+        public AddressService(IAddressRepository addressRepository, IAzureImageService azureImageService)
         {
             this._addressRepository = addressRepository;
+            this._azureImageService = azureImageService;
         }
 
         public async Task<AddressResponse> GetById(int id)
@@ -34,21 +39,40 @@ namespace Application.Services
             return viewModels;
         }
 
-        public async Task Create(CreateAddressRequest request, string image)
+        public async Task<AddressResponse> Create(CreateAddressRequest request)
         {
-            Address model = AddressMapper.ToModel(request, image);
+            string urlImage = DefaultImagesPath.Address;
+            if (request.Image != null) {
+                urlImage = await this._azureImageService.UploadImageAsync(
+                    request.Image.OpenReadStream(),
+                    FolderImageEnum.Addresses.ToString().ToLower(),
+                    request.Image.ContentType
+                );
+            }
 
-            await this._addressRepository.Add(model);
+            Address model = AddressMapper.ToModel(request, urlImage);
+            return AddressMapper.ToResponse(await this._addressRepository.Add(model));
         }
 
-        public async Task Update(UpdateAddressRequest request, string image)
+        public async Task<AddressResponse> Update(UpdateAddressRequest request)
         {
             Address? model = await this._addressRepository.GetById(request.Id);
             if(model == null) throw new NotFoundException("La dirección no existe");
 
-            Address newAddress = AddressMapper.ToModel(request, image);
+            string urlImage = model.Image;
 
-            await this._addressRepository.Update(model);
+            if (request.Image != null) {
+                urlImage = await this._azureImageService.UploadImageAsync(
+                    request.Image.OpenReadStream(),
+                    FolderImageEnum.Addresses.ToString().ToLower(),
+                    request.Image.ContentType
+                );
+                await this._azureImageService.DeleteAsync(model.Image);
+            }
+            Address newAddress = AddressMapper.ToModel(request, urlImage);
+
+            Address address = await this._addressRepository.Update(model);
+            return AddressMapper.ToResponse(address);
         }
 
         public async Task Delete(int id)
