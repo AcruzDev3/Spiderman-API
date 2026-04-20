@@ -40,7 +40,7 @@ namespace Application.Services
             return viewModels;
         }
 
-        public async Task Create(CreateCrimeRequest request)
+        public async Task<CrimeResponse> Create(CreateCrimeRequest request)
         {
             CrimeGrade? grade = await this._crimeRepository.GetGradeByName(request.GradeId);
             if (grade == null) throw new NotFoundException("El grado del crimen no es válido");
@@ -59,10 +59,10 @@ namespace Application.Services
 
             Crime model = CrimeMapper.ToModel(request, address, criminals, users, grade, type);
 
-            await this._crimeRepository.Add(model);
+            return await this.GetCrime(await this._crimeRepository.Add(model));
         }
-
-        public async Task Update(UpdateCrimeRequest request) {
+        
+        public async Task<CrimeResponse> Update(UpdateCrimeRequest request) {
             CrimeGrade? grade = await this._crimeRepository.GetGradeByName(request.GradeId);
             if (grade == null) throw new NotFoundException("El grado del crimen no es válido");
 
@@ -80,8 +80,9 @@ namespace Application.Services
 
             Crime model = CrimeMapper.ToModel(request, address, criminals, users, grade, type);
 
-            await this._crimeRepository.Update(model);
+            return await this.GetCrime(await this._crimeRepository.Update(model));
         }
+
         public async Task Delete(int id)
         {
             Crime? crime = await this._crimeRepository.GetById(id);
