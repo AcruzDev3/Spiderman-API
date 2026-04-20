@@ -1,6 +1,9 @@
-﻿using Application.Contracts.Requests.Criminal;
+﻿using Application.Constans;
+using Application.Contracts.Requests.Criminal;
 using Application.Contracts.Responses;
+using Application.Enums;
 using Application.Exceptions;
+using Application.Interfaces.IServices;
 using Application.Interfaces.Services;
 using Application.Mappers;
 using Domain.Interfaces.IRepositories;
@@ -12,10 +15,13 @@ namespace Application.Services
     {
         private readonly ICriminalRepository _criminalRepository;
         private readonly ICrimeRepository _crimeRepository;
-        public CriminalService(ICriminalRepository criminalRepository, ICrimeRepository _crimeRepository)
+        private readonly IAzureImageService _azureImageService;
+        public CriminalService(ICriminalRepository criminalRepository, ICrimeRepository _crimeRepository,
+            IAzureImageService azureImageService)
         {
             this._criminalRepository = criminalRepository;
             this._crimeRepository = _crimeRepository;
+            this._azureImageService = azureImageService;
         }
 
         public async Task<CriminalResponse> GetById(int id)
@@ -40,25 +46,54 @@ namespace Application.Services
             return viewModels;
         }
 
-        public async Task Create(CreateCriminalRequest request, string pathImageProfile)
+        public async Task<CriminalResponse> Create(CreateCriminalRequest request, string pathImageProfile)
         {
             CriminalRiskLevel? riskLevel = await this._criminalRepository.GetCriminalRiskLevelAsync(request.RiskId);
             if (riskLevel == null) throw new NotFoundException("El nivel de riesgo no es válido");
 
+            string urlImage = DefaultImagesPath.User;
+            if (request.Image != null) {
+                urlImage = await this._azureImageService.UploadImageAsync(
+                    request.Image.OpenReadStream(),
+                    FolderImageEnum.Criminals.ToString().ToLower(),
+                    request.Image.ContentType
+                );
+            }
+
             Criminal model = CriminalMapper.ToModel(request, riskLevel, pathImageProfile);
             if(await this._criminalRepository.Exists(request.Name))
+                throw new Exception("El criminal ya existe");
 
-            await this._criminalRepository.Add(model);
+            return CriminalMapper.ToResponse(
+                await this._criminalRepository.Add(model),
+                CriminalRiskLevelMapper.ToResponse(riskLevel)
+            );
         }
 
-        public async Task Update(UpdateCriminalRequest request, string pathImageProfile) {
+        public async Task<CriminalResponse> Update(UpdateCriminalRequest request, string pathImageProfile) {
             CriminalRiskLevel? riskLevel = await this._criminalRepository.GetCriminalRiskLevelAsync(request.RiskId);
             if (riskLevel == null) throw new NotFoundException("El nivel de riesgo no es válido");
 
             Criminal? model = await this._criminalRepository.GetById(request.Id);
+            if(model == null) throw new NotFoundException("El criminal no existe");
 
-            Criminal newUser = CriminalMapper.ToModel(request, riskLevel, pathImageProfile);
-            await this._criminalRepository.Update(model);
+            string urlImage = model.Image;
+
+            if (request.Image != null) {
+                urlImage = await this._azureImageService.UploadImageAsync(
+                    request.Image.OpenReadStream(),
+                    FolderImageEnum.Criminals.ToString().ToLower(),
+                    request.Image.ContentType
+                );
+                await this._azureImageService.DeleteAsync(model.Image);
+            }
+
+            Criminal newCriminal = CriminalMapper.ToModel(request, riskLevel, pathImageProfile);
+            
+            return CriminalMapper.ToResponse(
+                await this._criminalRepository.Update(newCriminal),
+                CriminalRiskLevelMapper.ToResponse(riskLevel)
+            );
         }
 
         public async Task Delete(int id)
