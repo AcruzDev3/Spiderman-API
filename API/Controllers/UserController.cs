@@ -1,9 +1,5 @@
-﻿using Application;
-using Application.Constans;
-using Application.Contracts.Requests.User;
+﻿using Application.Contracts.Requests.User;
 using Application.Contracts.Responses;
-using Application.Enums;
-using Application.Interfaces.IServices;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
