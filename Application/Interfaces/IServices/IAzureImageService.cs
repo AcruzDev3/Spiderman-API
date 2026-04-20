@@ -3,6 +3,6 @@
     public interface IAzureImageService
     {
         Task<string> UploadImageAsync(Stream file, string folder, string contentType);
-        Task<bool> DeleteAasync(string urlImage);
+        Task<bool> DeleteAsync(string urlImage);
     }
 }
