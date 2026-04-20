@@ -55,21 +55,25 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task Add(Address address) {
+        public async Task<Address> Add(Address address) {
             try {
-                await this._context.Addresses.AddAsync(AddressMapper.ToEntity(address));
+                AddressEntity entity = AddressMapper.ToEntity(address);
+                await this._context.Addresses.AddAsync(entity);
                 int rowsAffected = await this._context.SaveChangesAsync();
                 if (rowsAffected != 1) throw new InfrastructureException("Error al añadir la dirección en la base de datos");
+                return AddressMapper.ToDomain(entity);
             } catch (Exception ex) {
                 throw new InfrastructureException($"Error al añadir la dirección en la base de datos: {ex.Message}");
             }
         }
 
-        public async Task Update(Address address) {
+        public async Task<Address> Update(Address address) {
             try {
-                this._context.Addresses.Update(AddressMapper.ToEntity(address));
+                AddressEntity entity = AddressMapper.ToEntity(address);
+                this._context.Addresses.Update(entity);
                 int rowsAffected = await this._context.SaveChangesAsync();
                 if (rowsAffected != 1) throw new InfrastructureException("Error al actualizar la dirección en la base de datos");
+                return AddressMapper.ToDomain(entity);
             } catch (Exception ex) {
                 throw new InfrastructureException($"Error al actualizar la dirección en la base de datos: {ex.Message}");
             }
