@@ -16,8 +16,10 @@ namespace Application.Services
         private readonly int _maxWidth;
         private readonly int _maxHeight;
         public AzureImageService(IConfiguration configuration) {
-            string connectionString = configuration.GetConnectionString("AzureStorage");
-            string containerName = configuration["AzureStorage:ContainerName"];
+            string connectionString = configuration.GetConnectionString("AzureStorage")
+                ?? throw new InvalidOperationException("La cadena de azure storage no esta configurada.");
+            string containerName = configuration["AzureStorage:ContainerName"]
+                ?? throw new InvalidOperationException("El nombre del contenedor de azure storage no esta configurado.");
 
             this._containerClient = new BlobContainerClient(connectionString, containerName);
             this._containerClient.CreateIfNotExists(PublicAccessType.Blob);
@@ -27,10 +29,9 @@ namespace Application.Services
         }
 
         public async Task<string> UploadImageAsync(Stream fileStream, string fileName, string contentType) {
-            
             Stream optimizedStream = this.ConvertToWebP(fileStream);
 
-            string webpFileName = Path.ChangeExtension(fileName, ".webp");
+            string webpFileName = $"{Guid.NewGuid()}.webp";
 
             BlobClient blobClient = this._containerClient.GetBlobClient(webpFileName);
             await blobClient.DeleteIfExistsAsync();
@@ -44,7 +45,7 @@ namespace Application.Services
             return blobClient.Uri.ToString();
         }
 
-        public async Task<bool> DeleteAasync(string urlImage) {
+        public async Task<bool> DeleteAsync(string urlImage) {
             if (String.IsNullOrEmpty(urlImage))
                 return false;
 
