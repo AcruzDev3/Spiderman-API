@@ -81,22 +81,25 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task Add(Crime crime) {
+        public async Task<Crime> Add(Crime crime) {
             try {
-                await this._context.Crimes.AddAsync(await this.GetCrimeEntity(crime));
+                CrimeEntity entity = await this.GetCrimeEntity(crime);
+                await this._context.Crimes.AddAsync(entity);
                 int rowsAffected = await this._context.SaveChangesAsync();
                 if (rowsAffected != 1) throw new InfrastructureException("Error al añadir el crimen en la base de datos");
+                return await this.GetCrimeModel(entity);
             } catch (Exception ex) {
                 throw new InfrastructureException($"Error al añadir el crimen en la base de datos: {ex.Message}");
             }
         }
-            
-        
-        public async Task Update(Crime crime) {
+
+        public async Task<Crime> Update(Crime crime) {
             try {
-                this._context.Crimes.Update(await this.GetCrimeEntity(crime));
+                CrimeEntity entity = await this.GetCrimeEntity(crime);
+                this._context.Crimes.Update(entity);
                 int rowsAffected = await this._context.SaveChangesAsync();
                 if (rowsAffected != 1) throw new InfrastructureException("Error al actualizar el crimen en la base de datos");
+                return await this.GetCrimeModel(entity);    
             } catch (Exception ex) {
                 throw new InfrastructureException($"Error al actualizar el crimen en la base de datos: {ex.Message}");
             }

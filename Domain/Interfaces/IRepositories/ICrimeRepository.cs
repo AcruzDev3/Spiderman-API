@@ -8,8 +8,8 @@ namespace Domain.Interfaces.IRepositories
         Task<List<Crime>?> GetAll();
         Task<CrimeGrade?> GetGradeByName(int gradeName);
         Task<CrimeType?> GetTypeByName(int typeName);
-        Task Add(Crime crime);
-        Task Update(Crime crime);
+        Task<Crime> Add(Crime crime);
+        Task<Crime> Update(Crime crime);
         Task Delete(Crime crime);
         Task DeleteRange(List<Crime> models);
     }
