@@ -46,7 +46,7 @@ namespace Application.Services
             return viewModels;
         }
 
-        public async Task<CriminalResponse> Create(CreateCriminalRequest request, string pathImageProfile)
+        public async Task<CriminalResponse> Create(CreateCriminalRequest request)
         {
             CriminalRiskLevel? riskLevel = await this._criminalRepository.GetCriminalRiskLevelAsync(request.RiskId);
             if (riskLevel == null) throw new NotFoundException("El nivel de riesgo no es válido");
@@ -60,7 +60,7 @@ namespace Application.Services
                 );
             }
 
-            Criminal model = CriminalMapper.ToModel(request, riskLevel, pathImageProfile);
+            Criminal model = CriminalMapper.ToModel(request, riskLevel, urlImage);
             if(await this._criminalRepository.Exists(request.Name))
                 throw new Exception("El criminal ya existe");
 
@@ -70,7 +70,7 @@ namespace Application.Services
             );
         }
 
-        public async Task<CriminalResponse> Update(UpdateCriminalRequest request, string pathImageProfile) {
+        public async Task<CriminalResponse> Update(UpdateCriminalRequest request) {
             CriminalRiskLevel? riskLevel = await this._criminalRepository.GetCriminalRiskLevelAsync(request.RiskId);
             if (riskLevel == null) throw new NotFoundException("El nivel de riesgo no es válido");
 
@@ -88,7 +88,7 @@ namespace Application.Services
                 await this._azureImageService.DeleteAsync(model.Image);
             }
 
-            Criminal newCriminal = CriminalMapper.ToModel(request, riskLevel, pathImageProfile);
+            Criminal newCriminal = CriminalMapper.ToModel(request, riskLevel, urlImage);
             
             return CriminalMapper.ToResponse(
                 await this._criminalRepository.Update(newCriminal),
