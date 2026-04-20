@@ -43,7 +43,7 @@ namespace Infrastructure.Services
             return blobClient.Uri.ToString();
         }
 
-        public async Task<bool> DeleteAasync(string urlImage) {
+        public async Task<bool> DeleteAsync(string urlImage) {
             if (String.IsNullOrEmpty(urlImage))
                 return false;
 
