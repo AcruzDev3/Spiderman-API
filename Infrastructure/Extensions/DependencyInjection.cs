@@ -14,7 +14,6 @@ namespace Infrastructure.Extensions
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IAddressRepository, AddressRepository>();
             services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
-
             return services;
         }
     }
