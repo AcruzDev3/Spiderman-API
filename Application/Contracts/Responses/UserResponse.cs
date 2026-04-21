@@ -3,9 +3,9 @@
     public class UserResponse
     {
         public int Id { get; set; }
-        public string Name { get; set; }
-        public RoleResponse Role { get; set; }
-        public string Image { get; set; }
-        
+        public string Name { get; set; } = null!;
+        public RoleResponse Role { get; set; } = null!;
+        public string Image { get; set; } = null!;
+
     }
 }
