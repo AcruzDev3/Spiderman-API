@@ -10,6 +10,7 @@ namespace Application.Interfaces.Services
         Task<UserResponse> Create(CreateUserRequest request);
         Task<UserResponse> Update(UpdateUserRequest request);
         Task ChangePassword(ChangePasswordRequest request);
+        Task ChangeEmail(ChangeEmailRequest request);
         Task Delete(int id);
     }
 }

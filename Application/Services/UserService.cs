@@ -60,8 +60,8 @@ namespace Application.Services
                 );
             }
 
-            request.Password = this._passwordHasher.Hash(request.Password);
-            User model = UserMapper.ToModel(request, role, urlImage);
+            string hashedPassword = this._passwordHasher.Hash(request.Password);
+            User model = UserMapper.ToModel(request, role, hashedPassword, urlImage);
 
             if (await this._userRepository.Exists(model.Email)) 
                 throw new Exception("El correo electrónico ya está registrado");
@@ -90,7 +90,7 @@ namespace Application.Services
                 await this._azureImageService.DeleteAsync(user.Image);
             }
 
-            User newUser = UserMapper.ToModel(request, role, user.Password, urlImage);
+            User newUser = UserMapper.ToModel(request, user.Email, role, user.Password, urlImage);
 
             return UserMapper.ToResponse(
                 await this._userRepository.Update(newUser),
@@ -107,6 +107,16 @@ namespace Application.Services
 
             user.ChangePassword(this._passwordHasher.Hash(request.NewPassword)); 
             await this._userRepository.Update(user);
+        }
+
+        public async Task ChangeEmail(ChangeEmailRequest request) {
+            User? user = await this._userRepository.GetById(request.UserId);
+            if (user == null) throw new NotFoundException("El usuario no existe");
+
+            if(!request.Email.Equals(user.Email)) {
+                user.ChangeEmail(request.Email);
+                await this._userRepository.Update(user);
+            }
         }
 
         public async Task Delete(int id) {

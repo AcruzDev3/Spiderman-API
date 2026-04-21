@@ -39,6 +39,12 @@ namespace API.Controllers
             return NoContent();
         }
 
+        [HttpPut("ChangeEmail")]
+        public async Task<IActionResult> ChangeEmail(ChangeEmailRequest request) {
+            await this._userService.ChangeEmail(request);
+            return NoContent();
+        }
+
         [HttpDelete]
         public async Task<IActionResult> Delete(int id) {
             await this._userService.Delete(id);

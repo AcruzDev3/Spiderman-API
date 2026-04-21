@@ -66,5 +66,9 @@ namespace Domain.Models
         public void ChangePassword(string password) {
             this.Password = password;
         }
+
+        public void ChangeEmail(string email) {
+            this.Email = email;
+        }
     }
 }
