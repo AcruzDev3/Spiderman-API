@@ -21,10 +21,10 @@ namespace Application.Contracts.Requests.Crime
         public int AddressId { get; set; }
 
         [Required(ErrorMessage = "Los criminales son obligatorios")]
-        public List<int> CriminalIds { get; set; }
+        public List<int> CriminalIds { get; set; } = null!;
 
         [Required(ErrorMessage = "Los heroes son obligatorios")]
-        public List<int> UserIds { get; set; }
+        public List<int> UserIds { get; set; } = null!;
 
         [Required(ErrorMessage = "El estado es obligatorio")]
         public bool Status { get; set; }

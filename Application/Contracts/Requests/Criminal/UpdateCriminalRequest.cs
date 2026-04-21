@@ -10,17 +10,17 @@ namespace Application.Contracts.Requests.Criminal
 
         [Required(ErrorMessage = "El nombre es obligatorio")]
         [StringLength(50, ErrorMessage = "El nombre no puede superar los 50 caracteres")]
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
 
         [Required(ErrorMessage = "La descripción es obligatoria")]
         [StringLength(300, ErrorMessage = "La descripción no puede superar los 300 caracteres")]
-        public string Description { get; set; }
+        public string Description { get; set; } = null!;
 
         [Required(ErrorMessage = "El riesgo es obligatorio")]
         public int RiskId { get; set; }
 
         [Required(ErrorMessage = "La imagen es obligatoria")]
-        public IFormFile Image { get; set; }
+        public IFormFile? Image { get; set; } 
 
         [Required(ErrorMessage = "La fecha desde es obligatoria")]
         public DateTime Since { get; set; }

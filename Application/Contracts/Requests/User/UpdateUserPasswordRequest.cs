@@ -8,14 +8,14 @@ namespace Application.Contracts.Requests.User
     {
         [Required(ErrorMessage = "La contraseña anterior es obligatoria")]
         [StrongPasswrod]
-        public string PreviousPassword { get; set; }
+        public string PreviousPassword { get; set; } = null!;
 
         [Required(ErrorMessage = "La nueva contraseña es obligatoria")]
         [StrongPasswrod]
-        public string NewPassword { get; set; }
+        public string NewPassword { get; set; } = null!;
 
         [Required(ErrorMessage = "La confirmación de la nueva contraseña es obligatoria")]
         [StrongPasswrod]
-        public string NewPasswordConfirmation { get; set; }
+        public string NewPasswordConfirmation { get; set; } = null!;
     }
 }

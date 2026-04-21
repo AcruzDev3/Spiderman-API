@@ -18,13 +18,13 @@ namespace Application.Contracts.Requests.Address
         [Required(ErrorMessage = "El código postal es obligatorio")]
         [StringLength(5, ErrorMessage = "La longitud del codigo postal no puede ser mayor a 5 caracteres")]
         [MinLength(5, ErrorMessage = "La longitud del codigo postal no puede ser menor a 5 caracteres")]
-        public string ZipCode { get; set; }
+        public string ZipCode { get; set; } = null!;
 
         [Required(ErrorMessage = "La calle es obligatoria")]
         [StringLength(150, ErrorMessage = "La longitud de la calle no puede ser mayor a 150 caracteres")]
-        public string Street { get; set; }
+        public string Street { get; set; } = null!;
 
         [Required(ErrorMessage = "La imagen es obligatoria")]
-        public IFormFile Image { get; set; }
+        public IFormFile? Image { get; set; } = null!;
     }
 }

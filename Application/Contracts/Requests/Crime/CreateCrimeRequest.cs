@@ -14,12 +14,12 @@ namespace Application.Contracts.Requests.Crime
         public string? Description { get; set; }
 
         [Required(ErrorMessage = "La dirección es obligatoria")]
-        public int AddressId { get; set; }
+        public int AddressId { get; set; } 
 
         [Required(ErrorMessage = "Los criminales son obligatorios")]
-        public List<int> CriminalIds { get; set; }
+        public List<int> CriminalIds { get; set; } = null!;
 
         [Required(ErrorMessage = "Los heroes son obligatorios")]
-        public List<int> UserIds { get; set; }
-    }
+        public List<int> UserIds { get; set; } = null!;
+    } 
 }
