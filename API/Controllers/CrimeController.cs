@@ -1,64 +1,48 @@
-﻿//using LIB.Managers;
-//using LIB.ViewModels;
-//using Microsoft.AspNetCore.Mvc;
+﻿using Application.Contracts.Requests.Crime;
+using Application.Contracts.Responses;
+using Application.Interfaces.Services;
+using Microsoft.AspNetCore.Mvc;
 
-//namespace API.Controllers
-//{
-//    [ApiController, Route("[controller]")]
-//    public class CrimeController : Controller
-//    {
-//        private readonly CrimeManager _crimeManager;
-//        public CrimeController(CrimeManager crimeManager)
-//        {
-//            _crimeManager = crimeManager;
-//        }
-//        [HttpGet, Route("GetAll")]
-//        public async Task<IActionResult> GetAll()
-//        {
-//            return Ok(await _crimeManager.Get());
-//        }
+namespace API.Controllers
+{
+    [ApiController, Route("api/[controller]")]
 
-//        [HttpPost, Route("Create")]
-//        public async Task<IActionResult> Create(CrimeViewModel crimeViewModel)
-//        {
-//            try{
-//                int response = await _crimeManager.Create(crimeViewModel); 
-//                if(response != -1) return BadRequest("No se ha podido crear el aviso");
-//            }
-//            catch (Exception ex)
-//            {
-//                return BadRequest("No se ha podido crear el aviso");
-//            }
-//            return Ok("El crimen se creo con exito");
-//        }
+    public class CrimeController : Controller
+    {
+        private readonly ICrimeService _crimeService;
+        public CrimeController(ICrimeService crimeService) {
+            this._crimeService = crimeService;
+        }
 
-//        [HttpPut, Route("Solved")]
-//        public async Task<IActionResult> Solved(int id)
-//        {
-//            try
-//            {
-//                int response = await _crimeManager.Solved(id);
-//                if (response != 1) return BadRequest("The crime can't solved");
-//            }
-//            catch(Exception ex)
-//            {
-//                return BadRequest("The crime can't be solved");
-//            }
-//            return Ok("The crime is solved");
-//        }
-//        [HttpDelete, Route("Delete")]
-//        public async Task<IActionResult> DeleteCrime(int id)
-//        {
-//            try
-//            {
-//                int response = await _crimeManager.Delete(id);
-//                if (response != 1) return BadRequest("No se ha podido eliminar el crimen");
-//            }
-//            catch(Exception ex)
-//            {
-//                return BadRequest("No se ha podido eliminar el crimen");
-//            }
-//            return Ok("El crimen se ha eliminado con exito");
-//        }
-//    }
-//}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+            => Ok(await this._crimeService.GetById(id));
+
+        [HttpGet]
+        public async Task<IActionResult> Index()
+            => Ok(await this._crimeService.GetAll());
+
+        [HttpPost]
+        public async Task<IActionResult> Create(CreateCrimeRequest request) {
+            CrimeResponse crimeResponse = await this._crimeService.Create(request);
+            return CreatedAtAction(nameof(GetById), new { id = crimeResponse.Id }, crimeResponse);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Update(UpdateCrimeRequest request)
+            => Ok(await this._crimeService.Update(request));
+
+
+        [HttpPut("Solved")]
+        public async Task<IActionResult> CrimeSolved(int id) {
+            await this._crimeService.Solved(id);
+            return NoContent();
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int id) {
+            await this._crimeService.Delete(id);
+            return NoContent();
+        }
+    }
+}
