@@ -10,7 +10,6 @@ namespace Infrastructure.Repositories
     public class UserRepository : IUserRepository
     {
         private readonly SpidermanContext _context;
-
         public UserRepository(SpidermanContext context) {
             this._context = context;
         }
@@ -42,10 +41,11 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task<List<User>> GetAll() {
+        public async Task<List<User>?> GetAll() {
             try {
                 List<UserEntity> entities = await this._context.Users
                                     .ToListAsync();
+                if (entities == null || entities.Count == 0) return null;
                 List<User> users = new List<User>();
                 foreach (UserEntity entity in entities) users.Add(await this.GetUserModel(entity));
                 return users;
@@ -112,19 +112,6 @@ namespace Infrastructure.Repositories
                 throw new InfrastructureException($"Error al verificar la existencia del usuario con email {email} en la base de datos: {ex.Message}");
             }
            
-        }
-
-        public async Task<Role?> GetRoleAsync(int idRole) {
-            try {
-                RoleEntity? entity = await _context.Roles
-                .AsNoTracking()
-                .FirstOrDefaultAsync(r => r.RoleId == idRole);
-
-                if (entity == null) return null;
-                else return RoleMapper.ToDomain(entity);
-            } catch (Exception ex) {
-                throw new InfrastructureException($"Error al obtener el rol con id {idRole} de la base de datos: {ex.Message}");
-            }
         }
 
         private async Task<User> GetUserModel(UserEntity entity) {
