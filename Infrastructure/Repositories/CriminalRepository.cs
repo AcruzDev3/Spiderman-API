@@ -10,7 +10,6 @@ namespace Infrastructure.Repositories
     public class CriminalRepository : ICriminalRepository
     {
         private readonly SpidermanContext _context;
-
         public CriminalRepository(SpidermanContext context) {
             this._context = context;
         }
@@ -52,23 +51,6 @@ namespace Infrastructure.Repositories
             } catch(Exception ex) {
                 throw new InfrastructureException($"Error al obtener todos los criminales de la base de datos: {ex.Message}");
             }
-            
-        }
-
-        public async Task<List<Crime>?> GetCrimes(Criminal model) {
-            try {
-                List<CrimeEntity>? crimesEntities = await this._context.Crimes
-                .Where(c => c.Criminals.Any(cr => cr.CriminalId == model.Id))
-                .ToListAsync();
-
-                List<Crime> crimes = new List<Crime>();
-                foreach (CrimeEntity crimeEntity in crimesEntities)
-                    crimes.Add(await this.GetCrimeModel(crimeEntity));
-
-                return crimes;
-            } catch(Exception ex) {
-                throw new InfrastructureException($"Error al obtener los crímenes del criminal con id {model.Id} de la base de datos: {ex.Message}");
-            }
         }
 
         public async Task<bool> Exists(string name) {
@@ -81,41 +63,6 @@ namespace Infrastructure.Repositories
                 else return true;
             } catch (Exception ex) {
                 throw new InfrastructureException($"Error al verificar la existencia del criminal con nombre {name} en la base de datos: {ex.Message}");
-            }
-        }
-
-        private async Task<Crime> GetCrimeModel(CrimeEntity entity) {
-            try {
-                CrimeGrade grade = CrimeGradeMapper.ToDomain(entity.Grade);
-                CrimeType type = CrimeTypeMapper.ToDomain(entity.Type);
-                Address address = AddressMapper.ToDomain(entity.Address);
-
-                List<User> users = new List<User>();
-                foreach (UserEntity userEntity in entity.Heroes) {
-                    Role role = RoleMapper.ToDomain(userEntity.Role);
-                    users.Add(UserMapper.ToDomain(userEntity, role));
-                }
-
-                List<Criminal> criminals = new List<Criminal>();
-                foreach (CriminalEntity criminalEntity in entity.Criminals) {
-                    CriminalRiskLevel risk = CriminalRiskLevelMapper.ToDomain(criminalEntity.Risk);
-                    criminals.Add(CriminalMapper.ToDomain(criminalEntity, risk));
-                }
-
-                return CrimeMapper.ToDomain(entity, users, criminals, address, grade, type);
-            } catch (Exception ex) {
-                throw new InfrastructureException($"Error al obtener el modelo de crimen con id {entity.CrimeId} de la base de datos: {ex.Message}");
-            }
-        }
-
-        public async Task<CriminalRiskLevel?> GetCriminalRiskLevelAsync(int idRisk) {
-            try {
-                CriminalRiskLevelEntity? entity = await this._context.CriminalRiskLevels
-                    .FirstOrDefaultAsync(r => r.CriminalRiskLevelId == idRisk);
-                if (entity != null) return CriminalRiskLevelMapper.ToDomain(entity);
-                else return null;
-            } catch (Exception ex) {
-                throw new InfrastructureException($"Error al obtener el nivel de riesgo del criminal con id {idRisk} de la base de datos: {ex.Message}");
             }
         }
 
