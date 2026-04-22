@@ -101,7 +101,7 @@ namespace Application.Services
             await this._crimeRepository.Update(crime);
         }
 
-        private async Task<List<UserResponse>> GetUsers(List<User> users) {
+        private List<UserResponse> GetUsers(List<User> users) {
             List<UserResponse> responses = new List<UserResponse>();
                 foreach (User model in users) {
                     RoleResponse role = RoleMapper.ToResponse(model.Role);
@@ -110,7 +110,7 @@ namespace Application.Services
             return responses;
         }
 
-        private async Task<List<CriminalResponse>> GetCriminals(List<Criminal> criminals) {
+        private List<CriminalResponse> GetCriminals(List<Criminal> criminals) {
             List<CriminalResponse> responses = new List<CriminalResponse>();
             foreach (Criminal model in criminals) {
                 CriminalRiskLevelResponse risk = CriminalRiskLevelMapper.ToResponse(model.Risk);
@@ -120,8 +120,8 @@ namespace Application.Services
         }
 
         private async Task<CrimeResponse> GetCrime(Crime model) {
-            List<UserResponse> users = await this.GetUsers(model.Users);
-            List<CriminalResponse> criminals = await this.GetCriminals(model.Criminals);
+            List<UserResponse> users = this.GetUsers(model.Users);
+            List<CriminalResponse> criminals = this.GetCriminals(model.Criminals);
 
             AddressResponse address = AddressMapper.ToResponse(model.Address);
             CrimeGradeResponse grade = CrimeGradeMapper.ToResponse(model.Grade);
