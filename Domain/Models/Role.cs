@@ -26,5 +26,11 @@ namespace Domain.Models
             if (name.Length > 100) throw new DomainValidationException("El nombre del rol no puede ser mayor a 100 caracteres");
             this.Name = name;
         }
+
+        public void ChangeName(string name) {
+            if (String.IsNullOrEmpty(name)) throw new DomainValidationException("El nombre del rol no es válido");
+            if (name.Length > 100) throw new DomainValidationException("El nombre del rol no puede ser mayor a 100 caracteres");
+            this.Name = name;
+        }
     }
 }

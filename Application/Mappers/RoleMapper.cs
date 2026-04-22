@@ -1,4 +1,5 @@
-﻿using Application.Contracts.Responses;
+﻿using Application.Contracts.Requests.Role;
+using Application.Contracts.Responses;
 using Domain.Models;
 
 namespace Application.Mappers
@@ -11,6 +12,10 @@ namespace Application.Mappers
                 Id = role.Id,
                 Name = role.Name
             };
+        }
+
+        public static Role ToModel(CreateRoleRequest request) {
+            return new Role(request.Name);
         }
     }
 }
