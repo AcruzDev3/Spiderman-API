@@ -42,9 +42,9 @@ namespace Application.Services
             return RoleMapper.ToResponse(await this._roleRepository.Add(model));
         }
 
-        public async Task<RoleResponse> Update(int id, UpdateRoleRequest request)
+        public async Task<RoleResponse> Update(UpdateRoleRequest request)
         {
-            Role? model = await this._roleRepository.GetById(id);
+            Role? model = await this._roleRepository.GetById(request.Id);
             if (model == null) throw new NotFoundException("El rol no existe");
             model.ChangeName(request.Name);
             
@@ -55,6 +55,7 @@ namespace Application.Services
         {
             Role? model = await this._roleRepository.GetById(id);
             if (model == null) throw new NotFoundException("El rol no existe");
+            await this._roleRepository.Delete(model);
         }
     }
 }
