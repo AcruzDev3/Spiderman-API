@@ -26,5 +26,9 @@ namespace Domain.Models
             if (name.Length > 20) throw new DomainValidationException("El nombre del nivel de peligrosidad del crimen no puede ser mayor a 20 caracteres");
             this.Name = name;
         }
+
+        public void ChangeName(string name) {
+            this.Name = name;
+        }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using Application.Interfaces;
+using Application.Interfaces.IServices;
+using Application.Services;
 using Domain.Interfaces.IRepositories;
 using Infrastructure.Repositories;
 using Infrastructure.Security;
@@ -15,6 +17,8 @@ namespace Infrastructure.Extensions
             services.AddScoped<IAddressRepository, AddressRepository>();
             services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
             services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IAzureImageService, AzureImageService>();
+            services.AddScoped<ICriminalRiskLevelRepository, CriminalRiskLevelRepository>();
             return services;
         }
     }
