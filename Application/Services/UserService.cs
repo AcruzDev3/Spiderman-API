@@ -16,14 +16,17 @@ namespace Application.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly ICrimeRepository _crimeRepository;
+        private readonly IRoleRepository _roleRepository;
         private readonly IAzureImageService _azureImageService;
         private readonly IPasswordHasher _passwordHasher;
         public UserService(IUserRepository userRepository, ICrimeRepository crimeRepository,
-            IAzureImageService azureImageService, IPasswordHasher passwordHasher) {
+            IAzureImageService azureImageService, IPasswordHasher passwordHasher, 
+            IRoleRepository roleRepository) {
             this._userRepository = userRepository;
             this._crimeRepository = crimeRepository;
             this._azureImageService = azureImageService;
             this._passwordHasher = passwordHasher;
+            this._roleRepository = roleRepository;
         }
 
         public async Task<UserResponse> GetById(int id) {
@@ -48,7 +51,7 @@ namespace Application.Services
         }
 
         public async Task<UserResponse> Create(CreateUserRequest request) {
-            Role? role = await this._userRepository.GetRoleAsync(request.RoleId);
+            Role? role = await this._roleRepository.GetById(request.RoleId);
             if (role == null) throw new NotFoundException("El rol del usuario no existe");
 
             string urlImage = DefaultImagesPath.User;
@@ -73,7 +76,7 @@ namespace Application.Services
         }
 
         public async Task<UserResponse> Update(UpdateUserRequest request) {
-            Role? role = await this._userRepository.GetRoleAsync(request.RoleId);
+            Role? role = await this._roleRepository.GetById(request.RoleId);
             if (role == null) throw new NotFoundException("El rol del usuario no existe");
 
             User? user = await this._userRepository.GetById(request.Id);
