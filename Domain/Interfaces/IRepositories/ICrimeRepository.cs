@@ -10,6 +10,7 @@ namespace Domain.Interfaces.IRepositories
         Task<CrimeType?> GetTypeByName(int typeName);
         Task<Crime> Add(Crime crime);
         Task<Crime> Update(Crime crime);
+        Task<List<Crime>?> GetCrimesOfCriminal(int criminalId);
         Task Delete(Crime crime);
         Task DeleteRange(List<Crime> models);
     }

@@ -8,6 +8,7 @@ namespace Application.Interfaces.Services
     {
         Task<CriminalResponse> GetById(int id);
         Task<List<CriminalResponse>> GetAll();
+        Task<List<CrimeResponse>> GetCriminalCrimes(int id);
         Task<CriminalResponse> Create(CreateCriminalRequest request);
         Task<CriminalResponse> Update(UpdateCriminalRequest request);
         Task Delete(int id);

@@ -14,13 +14,15 @@ namespace Application.Services
     public class CriminalService : ICriminalService
     {
         private readonly ICriminalRepository _criminalRepository;
+        private readonly ICriminalRiskLevelRepository _criminalRiskLevelRepository;
         private readonly ICrimeRepository _crimeRepository;
         private readonly IAzureImageService _azureImageService;
-        public CriminalService(ICriminalRepository criminalRepository, ICrimeRepository _crimeRepository,
-            IAzureImageService azureImageService)
+        public CriminalService(ICriminalRepository criminalRepository, ICriminalRiskLevelRepository criminalRiskLevelRepository,
+            ICrimeRepository crimeRepository, IAzureImageService azureImageService)
         {
             this._criminalRepository = criminalRepository;
-            this._crimeRepository = _crimeRepository;
+            this._criminalRiskLevelRepository = criminalRiskLevelRepository;
+            this._crimeRepository = crimeRepository;
             this._azureImageService = azureImageService;
         }
 
@@ -46,9 +48,27 @@ namespace Application.Services
             return viewModels;
         }
 
+        public async Task<List<CrimeResponse>> GetCriminalCrimes(int id) {
+            List<Crime>? crimes = await this._crimeRepository.GetCrimesOfCriminal(id);
+            if (crimes == null) throw new NotFoundException("No se han podido obtener los crímenes del criminal");
+
+            List<CrimeResponse> viewModels = new List<CrimeResponse>();
+            foreach (Crime model in crimes) {
+                List<UserResponse> users = this.GetUsers(model.Users);
+                List<CriminalResponse> criminals = this.GetCriminals(model.Criminals);
+
+                AddressResponse address = AddressMapper.ToResponse(model.Address);
+                CrimeGradeResponse grade = CrimeGradeMapper.ToResponse(model.Grade);
+                CrimeTypeResponse type = CrimeTypeMapper.ToResponse(model.Type);
+
+                viewModels.Add(CrimeMapper.ToResponse(model, address, criminals, users, grade, type));
+            }
+            return viewModels;
+        }
+
         public async Task<CriminalResponse> Create(CreateCriminalRequest request)
         {
-            CriminalRiskLevel? riskLevel = await this._criminalRepository.GetCriminalRiskLevelAsync(request.RiskId);
+            CriminalRiskLevel? riskLevel = await this._criminalRiskLevelRepository.GetById(request.RiskId);
             if (riskLevel == null) throw new NotFoundException("El nivel de riesgo no es válido");
 
             string urlImage = DefaultImagesPath.User;
@@ -71,7 +91,7 @@ namespace Application.Services
         }
 
         public async Task<CriminalResponse> Update(UpdateCriminalRequest request) {
-            CriminalRiskLevel? riskLevel = await this._criminalRepository.GetCriminalRiskLevelAsync(request.RiskId);
+            CriminalRiskLevel? riskLevel = await this._criminalRiskLevelRepository.GetById(request.RiskId);
             if (riskLevel == null) throw new NotFoundException("El nivel de riesgo no es válido");
 
             Criminal? model = await this._criminalRepository.GetById(request.Id);
@@ -101,7 +121,7 @@ namespace Application.Services
             Criminal? criminal = await this._criminalRepository.GetById(id);
             if (criminal == null) throw new NotFoundException("No se pudo encontrar el criminal");
 
-            List<Crime>? crimes = await this._criminalRepository.GetCrimes(criminal);
+            List<Crime>? crimes = await this._crimeRepository.GetCrimesOfCriminal(criminal.Id);
                 
             await this._criminalRepository.Delete(criminal);
                 
@@ -112,6 +132,24 @@ namespace Application.Services
 
             if (crimesWithoutCriminals.Any())
                 await this._crimeRepository.DeleteRange(crimesWithoutCriminals);
+        }
+
+        private List<UserResponse> GetUsers(List<User> users) {
+            List<UserResponse> responses = new List<UserResponse>();
+            foreach (User model in users) {
+                RoleResponse role = RoleMapper.ToResponse(model.Role);
+                responses.Add(UserMapper.ToResponse(model, role));
+            }
+            return responses;
+        }
+
+        private List<CriminalResponse> GetCriminals(List<Criminal> criminals) {
+            List<CriminalResponse> responses = new List<CriminalResponse>();
+            foreach (Criminal model in criminals) {
+                CriminalRiskLevelResponse risk = CriminalRiskLevelMapper.ToResponse(model.Risk);
+                responses.Add(CriminalMapper.ToResponse(model, risk));
+            }
+            return responses;
         }
     }
 }

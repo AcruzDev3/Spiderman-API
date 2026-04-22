@@ -129,6 +129,22 @@ namespace Infrastructure.Repositories
             }
         }
 
+        public async Task<List<Crime>?> GetCrimesOfCriminal(int criminalId) {
+            try {
+                List<CrimeEntity>? crimesEntities = await this._context.Crimes
+                .Where(c => c.Criminals.Any(cr => cr.CriminalId == criminalId))
+                .ToListAsync();
+
+                List<Crime> crimes = new List<Crime>();
+                foreach (CrimeEntity crimeEntity in crimesEntities)
+                    crimes.Add(await this.GetCrimeModel(crimeEntity));
+
+                return crimes;
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al obtener los crímenes del criminal con id {criminalId} de la base de datos: {ex.Message}");
+            }
+        }
+
         private async Task<List<UserEntity>> GetUsersOfCrime(List<User> users) {
             try {
                 List<UserEntity> userEntities = new List<UserEntity>();
