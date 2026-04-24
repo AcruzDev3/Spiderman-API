@@ -27,5 +27,11 @@ namespace Domain.Models
             if (name.Length > 50) throw new DomainValidationException("El nombre del tipo de crimen no puede ser mayor a 50 caracteres");
             this.Name = name;
         }
+
+        public void ChangeName(string name) {
+            if (String.IsNullOrEmpty(name)) throw new DomainValidationException("El nombre del tipo del crimen no es válido");
+            if (name.Length > 50) throw new DomainValidationException("El nombre del tipo de crimen no puede ser mayor a 50 caracteres");
+            this.Name = name;
+        }
     }
 }

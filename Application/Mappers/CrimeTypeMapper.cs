@@ -1,5 +1,6 @@
 ﻿using Domain.Models;
 using Application.Contracts.Responses;
+using Application.Contracts.Requests.CrimeType;
 
 namespace Application.Mappers
 {
@@ -11,6 +12,10 @@ namespace Application.Mappers
                 Id = crimeType.Id,
                 Name = crimeType.Name,
             };
+        }
+
+        public static CrimeType ToModel(CreateCrimeTypeRequest request) {
+            return new CrimeType(request.Name);
         }
     }
 }
