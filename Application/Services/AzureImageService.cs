@@ -16,7 +16,7 @@ namespace Application.Services
         private readonly int _maxWidth;
         private readonly int _maxHeight;
         public AzureImageService(IConfiguration configuration) {
-            string connectionString = configuration.GetConnectionString("AzureStorage")
+            string connectionString = configuration["AzureStorage:ConnectionString"]
                 ?? throw new InvalidOperationException("La cadena de azure storage no esta configurada.");
             string containerName = configuration["AzureStorage:ContainerName"]
                 ?? throw new InvalidOperationException("El nombre del contenedor de azure storage no esta configurado.");
