@@ -1,5 +1,6 @@
 ﻿using Domain.Models;
 using Application.Contracts.Responses;
+using Application.Contracts.Requests.CrimeGrade;
 
 namespace Application.Mappers
 {
@@ -11,6 +12,10 @@ namespace Application.Mappers
                 Id = crimeGrade.Id,
                 Name = crimeGrade.Name,
             };
+        }
+
+        public static CrimeGrade ToModel(CreateCrimeGradeRequest request) {
+            return new CrimeGrade(request.Name);
         }
     }
 }
