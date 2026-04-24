@@ -51,6 +51,10 @@ namespace Application.Services
         }
 
         public async Task<UserResponse> Create(CreateUserRequest request) {
+
+            if (await this._userRepository.Exists(request.Email))
+                throw new ConflictException("El correo electrónico ya está registrado");
+
             Role? role = await this._roleRepository.GetById(request.RoleId);
             if (role == null) throw new NotFoundException("El rol del usuario no existe");
 
@@ -65,9 +69,6 @@ namespace Application.Services
 
             string hashedPassword = this._passwordHasher.Hash(request.Password);
             User model = UserMapper.ToModel(request, role, hashedPassword, urlImage);
-
-            if (await this._userRepository.Exists(model.Email)) 
-                throw new Exception("El correo electrónico ya está registrado");
 
             return UserMapper.ToResponse(
                 await this._userRepository.Add(model),
@@ -116,7 +117,7 @@ namespace Application.Services
             User? user = await this._userRepository.GetById(request.UserId);
             if (user == null) throw new NotFoundException("El usuario no existe");
 
-            if(!request.Email.Equals(user.Email)) {
+            if (!request.Email.Equals(user.Email)) {
                 user.ChangeEmail(request.Email);
                 await this._userRepository.Update(user);
             }

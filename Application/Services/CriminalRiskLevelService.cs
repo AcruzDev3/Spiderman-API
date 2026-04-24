@@ -35,7 +35,7 @@ namespace Application.Services
         public async Task<CriminalRiskLevelResponse> Create(CreateCriminalRiskLevelRequest request) {
             CriminalRiskLevel model = CriminalRiskLevelMapper.ToModel(request);
             if (await this._criminalRiskLevelRepository.Exists(model.Name))
-                throw new Exception("El nombre del nivel de peligrosidad del criminal ya está registrado");
+                throw new ConflictException("El nombre del nivel de peligrosidad del criminal ya está registrado");
             return CriminalRiskLevelMapper.ToResponse(await this._criminalRiskLevelRepository.Add(model));
         }
 

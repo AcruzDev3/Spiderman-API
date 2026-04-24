@@ -82,7 +82,7 @@ namespace Application.Services
 
             Criminal model = CriminalMapper.ToModel(request, riskLevel, urlImage);
             if(await this._criminalRepository.Exists(request.Name))
-                throw new Exception("El criminal ya existe");
+                throw new ConflictException("El criminal ya existe");
 
             return CriminalMapper.ToResponse(
                 await this._criminalRepository.Add(model),

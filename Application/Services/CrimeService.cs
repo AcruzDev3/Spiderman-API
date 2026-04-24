@@ -58,7 +58,7 @@ namespace Application.Services
             if (address == null) throw new NotFoundException("La dirección no es válida");
 
             Crime model = CrimeMapper.ToModel(request, address, criminals, users, grade, type);
-
+            
             return await this.GetCrime(await this._crimeRepository.Add(model));
         }
         

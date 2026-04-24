@@ -35,7 +35,7 @@ namespace Application.Services
         public async Task<CrimeTypeResponse> Create(CreateCrimeTypeRequest request) {
             CrimeType model = CrimeTypeMapper.ToModel(request);
             if (await this._crimeTypeRepository.Exists(model.Name))
-                throw new Exception("El nombre del tipo de crimen ya está registrado");
+                throw new ConflictException("El nombre del tipo de crimen ya está registrado");
             return CrimeTypeMapper.ToResponse(await this._crimeTypeRepository.Add(model));
         }
 

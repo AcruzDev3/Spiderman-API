@@ -49,8 +49,10 @@ namespace Application.Services
                     request.Image.ContentType
                 );
             }
-
+            
             Address model = AddressMapper.ToModel(request, urlImage);
+            if (await this._addressRepository.Exists(model))
+                throw new ConflictException("La dirección ya existe");
             return AddressMapper.ToResponse(await this._addressRepository.Add(model));
         }
 

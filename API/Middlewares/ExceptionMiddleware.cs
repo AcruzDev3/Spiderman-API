@@ -44,6 +44,10 @@ namespace API.Middlewares
                 case InfrastructureException:
                 statusCode = HttpStatusCode.InternalServerError; // 500
                 break;
+
+                case ConflictException:
+                statusCode= HttpStatusCode.Conflict; // 409
+                break;
             }
 
             var response = new {

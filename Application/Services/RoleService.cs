@@ -38,7 +38,7 @@ namespace Application.Services
         {
             Role model = RoleMapper.ToModel(request);
             if (await this._roleRepository.Exists(model.Name))
-                throw new Exception("El nombre del rol ya está registrado");
+                throw new ConflictException("El nombre del rol ya está registrado");
             return RoleMapper.ToResponse(await this._roleRepository.Add(model));
         }
 
