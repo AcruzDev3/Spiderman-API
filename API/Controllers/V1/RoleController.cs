@@ -1,11 +1,13 @@
 ﻿using Application.Contracts.Requests.Role;
 using Application.Contracts.Responses;
 using Application.Interfaces.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.V1
 {
     [ApiController, Route("api/[controller]")]
+    [Authorize(Roles = "HERO")]
     public class RoleController : ControllerBase
     {
         private readonly IRoleService _roleService;

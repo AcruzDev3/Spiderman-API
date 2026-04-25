@@ -1,11 +1,13 @@
 ﻿using Application.Contracts.Requests.CriminalRiskLevel;
 using Application.Contracts.Responses;
 using Application.Interfaces.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.V1
 {
     [ApiController, Route("api/[controller]")]
+    [Authorize(Roles = "HERO")]
     public class CriminalRiskLevelController : ControllerBase
     {
         private readonly ICriminalRiskLevelService _criminalRiskLevelService;

@@ -1,11 +1,13 @@
 ﻿using Application.Contracts.Requests.Crime;
 using Application.Contracts.Responses;
 using Application.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.V1
 {
     [ApiController, Route("api/[controller]")]
+    [Authorize]
     public class CrimeController : ControllerBase
     {
         private readonly ICrimeService _crimeService;
@@ -47,6 +49,7 @@ namespace API.Controllers.V1
 
 
         [HttpPut("Solved")]
+        [Authorize(Roles = "HERO")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -58,6 +61,7 @@ namespace API.Controllers.V1
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "HERO")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

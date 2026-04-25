@@ -4,11 +4,13 @@ using Application.Exceptions;
 using Application.Mappers;
 using Domain.Interfaces.IRepositories;
 using Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.V1
 {
     [ApiController, Route("api/[controller]")]
+    [Authorize]
     public class CrimeGradeController : ControllerBase
     {
         private readonly ICrimeGradeRepository _crimeGradeRepository;
@@ -18,6 +20,7 @@ namespace API.Controllers.V1
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "HERO")]
         [ProducesResponseType(typeof(CrimeGradeResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -42,6 +45,7 @@ namespace API.Controllers.V1
         }
 
         [HttpPost]
+        [Authorize(Roles = "HERO")]
         [ProducesResponseType(typeof(CrimeGradeResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -54,6 +58,7 @@ namespace API.Controllers.V1
         }
 
         [HttpPut]
+        [Authorize(Roles = "HERO")]
         [ProducesResponseType(typeof(CrimeGradeResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -67,6 +72,7 @@ namespace API.Controllers.V1
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "HERO")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

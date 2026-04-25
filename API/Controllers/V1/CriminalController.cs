@@ -1,12 +1,13 @@
 ﻿using Application.Contracts.Requests.Criminal;
 using Application.Contracts.Responses;
 using Application.Interfaces.Services;
-using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.V1
 {
     [ApiController, Route("api/[controller]")]
+    [Authorize]
     public class CriminalController : ControllerBase
     {
         private readonly ICriminalService _criminalService;
@@ -29,6 +30,7 @@ namespace API.Controllers.V1
             => Ok(await this._criminalService.GetAll());
 
         [HttpPost]
+        [Authorize(Roles = "HERO")]
         [ProducesResponseType(typeof(CriminalResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -39,6 +41,7 @@ namespace API.Controllers.V1
         }
 
         [HttpPut]
+        [Authorize(Roles = "HERO")]
         [ProducesResponseType(typeof(CriminalResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -47,6 +50,7 @@ namespace API.Controllers.V1
             => Ok(await this._criminalService.Update(request));
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "HERO")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
