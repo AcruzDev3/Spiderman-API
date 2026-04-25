@@ -37,10 +37,23 @@ namespace Application.Services
             return UserMapper.ToResponse(model, roleViewModel);
         }
 
-        public async Task<List<UserResponse>> GetAll() {
+        public async Task<List<UserResponse>> GetAllNeighbours() {
             List<UserResponse> viewModels = new List<UserResponse>();
             
-            List<User>? models = await this._userRepository.GetAll();
+            List<User>? models = await this._userRepository.GetAllNeighbours();
+            if (models == null) throw new NotFoundException("No se han podido obtener los usuarios");
+
+            foreach (User model in models) {
+                RoleResponse roleViewModel = RoleMapper.ToResponse(model.Role);
+                viewModels.Add(UserMapper.ToResponse(model, roleViewModel));
+            }
+            return viewModels;
+        }
+
+        public async Task<List<UserResponse>> GetAllHeroes() {
+            List<UserResponse> viewModels = new List<UserResponse>();
+
+            List<User>? models = await this._userRepository.GetAllHeroes();
             if (models == null) throw new NotFoundException("No se han podido obtener los usuarios");
 
             foreach (User model in models) {
@@ -127,7 +140,7 @@ namespace Application.Services
             User? user = await this._userRepository.GetById(id);
             if (user == null) throw new NotFoundException("El usuario no existe");
 
-            List<Crime>? crimes = await this._userRepository.GetCrimes(user);
+            List<Crime>? crimes = await this._userRepository.GetHeroCrimes(user);
                 
             await this._userRepository.Delete(user);
 

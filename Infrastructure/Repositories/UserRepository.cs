@@ -28,7 +28,7 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task<List<User>?> GetByIds(List<int> ids) {
+        public async Task<List<User>?> GetHeroesByIds(List<int> ids) {
             try {
                 List<UserEntity> entities = await this._context.Users
                 .Where(u => ids.Contains(u.UserId))
@@ -55,9 +55,10 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task<List<User>?> GetAll() {
+        public async Task<List<User>?> GetAllNeighbours() {
             try {
                 List<UserEntity> entities = await this._context.Users
+                                    .Where(u => u.Role.Name.Equals("NEIGHBOUR", StringComparison.OrdinalIgnoreCase))
                                     .ToListAsync();
                 if (entities == null || entities.Count == 0) return null;
                 List<User> users = new List<User>();
@@ -68,7 +69,21 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task<List<Crime>?> GetCrimes(User model) {
+        public async Task<List<User>?> GetAllHeroes() {
+            try {
+                List<UserEntity> entities = await this._context.Users
+                                    .Where(u => u.Role.Name.Equals("HERO", StringComparison.OrdinalIgnoreCase))
+                                    .ToListAsync();
+                if (entities == null || entities.Count == 0) return null;
+                List<User> users = new List<User>();
+                foreach (UserEntity entity in entities) users.Add(await this.GetUserModel(entity));
+                return users;
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al obtener todos los usuarios de la base de datos: {ex.Message}");
+            }
+        }
+
+        public async Task<List<Crime>?> GetHeroCrimes(User model) {
             try {
                 List<CrimeEntity> crimesEntities = await _context.Crimes
                     .Where(c => c.Heroes.Any(u => u.UserId == model.Id))

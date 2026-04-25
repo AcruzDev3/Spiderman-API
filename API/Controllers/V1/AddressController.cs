@@ -1,11 +1,13 @@
 ﻿using Application.Contracts.Requests.Address;
 using Application.Contracts.Responses;
 using Application.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.V1
 {
     [ApiController, Route("api/[controller]")]
+    [Authorize]
     public class AddressController : ControllerBase
     {
         private readonly IAddressService _addressService;
@@ -29,6 +31,7 @@ namespace API.Controllers.V1
             => Ok(await this._addressService.GetAll());
 
         [HttpPost]
+        [Authorize(Roles = "HERO")]
         [ProducesResponseType(typeof(AddressResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -39,6 +42,7 @@ namespace API.Controllers.V1
         }
 
         [HttpPut]
+        [Authorize(Roles = "HERO")]
         [ProducesResponseType(typeof(AddressResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -47,6 +51,7 @@ namespace API.Controllers.V1
             => Ok(await this._addressService.Update(request));
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "HERO")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
