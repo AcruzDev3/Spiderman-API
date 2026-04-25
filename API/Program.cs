@@ -5,7 +5,9 @@ using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using Infrastructure.EF_Entities;
 using Infrastructure.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 using System.Text.Json.Serialization;
 
 public class Program
@@ -30,7 +32,27 @@ public class Program
             });
 
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options => {
+                options.Authority = "https://tu-auth.com/";
+                options.Audience = "api";
+            });
+
+        builder.Services.AddSwaggerGen(options => {
+            options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme {
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                Description = "JWT Authorization header using the Bearer scheme."
+            });
+
+            options.AddSecurityRequirement(document =>
+                new OpenApiSecurityRequirement {
+                    [new OpenApiSecuritySchemeReference("bearer", document)] = []
+                }
+            );
+        });
 
         builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
 
@@ -44,7 +66,6 @@ public class Program
 
         app.UseMiddleware<ExceptionMiddleware>();
 
-        //Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment()) {
             app.UseSwagger();
             app.UseSwaggerUI(options => {
@@ -64,7 +85,6 @@ public class Program
         app.UseHttpsRedirection();
         app.MapControllers();
 
-        // app.MapGet("/", () => "Spiderman");
         app.Run();
     }
 }
