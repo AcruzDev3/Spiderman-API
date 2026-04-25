@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers.V1
 {
     [ApiController, Route("api/[controller]")]
-    public class CrimeController : Controller
+    public class CrimeController : ControllerBase
     {
         private readonly ICrimeService _crimeService;
         public CrimeController(ICrimeService crimeService) {

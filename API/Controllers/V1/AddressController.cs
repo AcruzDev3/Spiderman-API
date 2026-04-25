@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers.V1
 {
     [ApiController, Route("api/[controller]")]
-    public class AddressController : Controller {
+    public class AddressController : ControllerBase
+    {
         private readonly IAddressService _addressService;
 
         public AddressController(IAddressService addressService) {

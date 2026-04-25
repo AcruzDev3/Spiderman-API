@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers.V1
 {
     [ApiController, Route("api/[controller]")]
-    public class CrimeGradeController : Controller
+    public class CrimeGradeController : ControllerBase
     {
         private readonly ICrimeGradeRepository _crimeGradeRepository;
 
