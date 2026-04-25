@@ -41,6 +41,20 @@ namespace Infrastructure.Repositories
             }
         }
 
+        public async Task<User?> GetByEmail(string email) {
+            try {
+                UserEntity? entity = await this._context.Users
+                    .Where(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase))
+                    .FirstOrDefaultAsync();
+
+                if (entity == null) return null;
+
+                return await this.GetUserModel(entity);
+            } catch(Exception ex) {
+                throw new InfrastructureException($"Error al obtener el usuario con email {email} de la base de datos: {ex.Message}");
+            }
+        }
+
         public async Task<List<User>?> GetAll() {
             try {
                 List<UserEntity> entities = await this._context.Users
