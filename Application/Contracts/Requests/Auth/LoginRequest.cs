@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Application.Contracts.Requests {
-    public class LogInRequest {
-
+namespace Application.Contracts.Requests.Auth
+{
+    public class LoginRequest
+    {
         [Required(ErrorMessage = "El correo electrónico es obligatorio")]
         [EmailAddress(ErrorMessage = "El formato del correo electrónico no es válido")]
         [StringLength(255, ErrorMessage = "La longitud del correo electrónico no pueder ser mayor a 255 caracteres")]

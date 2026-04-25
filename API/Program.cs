@@ -8,7 +8,7 @@ using Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
-internal class Program
+public class Program
 {
     private static void Main(string[] args) {
         var builder = WebApplication.CreateBuilder(args);
@@ -59,8 +59,9 @@ internal class Program
             });
         }
 
-        app.UseHttpsRedirection();
+        app.UseAuthentication();
         app.UseAuthorization();
+        app.UseHttpsRedirection();
         app.MapControllers();
 
         // app.MapGet("/", () => "Spiderman");

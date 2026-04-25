@@ -19,6 +19,8 @@ namespace Infrastructure.Extensions
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IAzureImageService, AzureImageService>();
             services.AddScoped<ICriminalRiskLevelRepository, CriminalRiskLevelRepository>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IJwtService, JwtService>();
             return services;
         }
     }
