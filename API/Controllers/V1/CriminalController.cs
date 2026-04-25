@@ -1,9 +1,10 @@
 ﻿using Application.Contracts.Requests.Criminal;
 using Application.Contracts.Responses;
 using Application.Interfaces.Services;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers 
+namespace API.Controllers.V1
 {
     [ApiController, Route("api/[controller]")]
     public class CriminalController : ControllerBase

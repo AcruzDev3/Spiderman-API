@@ -1,10 +1,9 @@
 ﻿using Application.Contracts.Requests.CriminalRiskLevel;
-using Application.Contracts.Requests.Role;
 using Application.Contracts.Responses;
 using Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers
+namespace API.Controllers.V1
 {
     [ApiController, Route("api/[controller]")]
     public class CriminalRiskLevelController : Controller

@@ -3,10 +3,9 @@ using Application.Contracts.Responses;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers
+namespace API.Controllers.V1
 {
     [ApiController, Route("api/[controller]")]
-
     public class CrimeController : Controller
     {
         private readonly ICrimeService _crimeService;

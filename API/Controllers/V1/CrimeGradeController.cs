@@ -6,8 +6,9 @@ using Domain.Interfaces.IRepositories;
 using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers
+namespace API.Controllers.V1
 {
+    [ApiController, Route("api/[controller]")]
     public class CrimeGradeController : Controller
     {
         private readonly ICrimeGradeRepository _crimeGradeRepository;
