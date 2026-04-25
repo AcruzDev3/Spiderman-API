@@ -34,7 +34,7 @@ namespace API.Controllers.V1
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Create(CreateAddressRequest request) {
             AddressResponse addressResponse = await this._addressService.Create(request);
-            return CreatedAtAction(nameof(GetById), new { id = addressResponse.Id}, addressResponse);
+            return CreatedAtAction(nameof(GetById), new { id = addressResponse.Id }, addressResponse);
         }
 
         [HttpPut]
@@ -45,7 +45,7 @@ namespace API.Controllers.V1
         public async Task<IActionResult> Update(UpdateAddressRequest request)
             => Ok(await this._addressService.Update(request));
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

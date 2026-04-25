@@ -45,7 +45,7 @@ namespace API.Controllers.V1
         public async Task<IActionResult> Update(UpdateCriminalRiskLevelRequest request)
             => Ok(await this._criminalRiskLevelService.Update(request));
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
