@@ -48,7 +48,7 @@ namespace Application.Services
             CrimeType? type = await this._crimeRepository.GetTypeByName(request.TypeId);
             if (type == null) throw new NotFoundException("El tipo del crimen no es válido");
 
-            List<User>? users = await this._userRepository.GetByIds(request.UserIds);
+            List<User>? users = await this._userRepository.GetHeroesByIds(request.UserIds);
             if (users == null) throw new NotFoundException("El usuario no es válido");
 
             List<Criminal>? criminals = await this._criminalRepository.GetByIds(request.CriminalIds);
@@ -69,7 +69,7 @@ namespace Application.Services
             CrimeType? type = await this._crimeRepository.GetTypeByName(request.TypeId);
             if (type == null) throw new NotFoundException("El tipo del crimen no es válido");
 
-            List<User>? users = await this._userRepository.GetByIds(request.UserIds);
+            List<User>? users = await this._userRepository.GetHeroesByIds(request.UserIds);
             if (users == null) throw new NotFoundException("El usuario no es válido");
 
             List<Criminal>? criminals = await this._criminalRepository.GetByIds(request.CriminalIds);
