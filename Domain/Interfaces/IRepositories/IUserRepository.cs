@@ -4,7 +4,8 @@ namespace Domain.Interfaces.IRepositories
 {
     public interface IUserRepository
     {
-        Task<User?> GetById(int id); 
+        Task<User?> GetById(int id);
+        Task<User?> GetByEmail(string email);
         Task<List<User>?> GetAll();
         Task<List<User>?> GetByIds(List<int> ids);
         Task<List<Crime>?> GetCrimes(User model);
