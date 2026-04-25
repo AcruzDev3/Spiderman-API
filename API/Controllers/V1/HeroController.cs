@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.V1
 {
+    [ApiController, Route("api/[controller]")]
     [Authorize]
     public class HeroController : ControllerBase
     {
