@@ -41,6 +41,21 @@ namespace Infrastructure.Repositories
             }
         }
 
+        public async Task<Role?> GetNeighbourRole() {
+            try {
+                RoleEntity? entity = await this._context.Roles
+                    .Where(r => r.Name.Equals("NEIGHBOUR", StringComparison.OrdinalIgnoreCase))
+                    .FirstOrDefaultAsync();
+
+                if (entity == null) return null;
+
+                else return RoleMapper.ToDomain(entity);
+
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al obtener el rol de vecino la base de datos: {ex.Message}");
+            }
+        }
+
         public async Task<Role> Add(Role model) {
             try {
                 RoleEntity entity = RoleMapper.ToEntity(model);
