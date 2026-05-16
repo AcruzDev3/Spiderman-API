@@ -1,8 +1,8 @@
-﻿namespace Infrastructure.EF_Entities;
+﻿namespace Infrastructure.Persistence.Entities;
 
-public partial class CrimeTypeEntity
+public partial class CrimeGradeEntity
 {
-    public int CrimeTypeId { get; set; }
+    public int CrimeGradeId { get; set; }
 
     public string Name { get; set; } = null!;
 

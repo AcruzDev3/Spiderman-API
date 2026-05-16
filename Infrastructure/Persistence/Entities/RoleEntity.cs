@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.EF_Entities;
+﻿namespace Infrastructure.Persistence.Entities;
 
 public partial class RoleEntity
 {
