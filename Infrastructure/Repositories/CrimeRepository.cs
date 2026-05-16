@@ -3,6 +3,7 @@ using Domain.Models;
 using Infrastructure.EF_Entities;
 using Infrastructure.Exceptions;
 using Infrastructure.Mappers;
+using Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories

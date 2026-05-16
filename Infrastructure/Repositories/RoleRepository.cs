@@ -4,6 +4,7 @@ using Infrastructure.EF_Entities;
 using Infrastructure.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Mappers;
+using Infrastructure.Persistence.Entities;
 
 namespace Infrastructure.Repositories
 {
