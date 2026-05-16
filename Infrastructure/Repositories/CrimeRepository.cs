@@ -45,8 +45,8 @@ namespace Infrastructure.Repositories
         public async Task<bool> Exists(Crime model) {
             try {
                 return await this._context.Crimes.AnyAsync(m =>
-                m.Grade.Name.Equals(model.Grade.Name, StringComparison.OrdinalIgnoreCase) &&
-                m.Type.Name.Equals(model.Type.Name, StringComparison.OrdinalIgnoreCase) &&
+                m.Grade.Name == model.Grade.Name &&
+                m.Type.Name == model.Type.Name &&
                 m.DateStart == model.DateStart &&
                 m.DateEnd == model.DateEnd &&
                 m.Status == model.Status &&

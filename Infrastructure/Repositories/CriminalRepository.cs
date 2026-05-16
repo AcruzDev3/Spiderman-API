@@ -56,8 +56,7 @@ namespace Infrastructure.Repositories
         public async Task<bool> Exists(string name) {
             try { 
                 CriminalEntity? entity = await this._context.Criminals
-                            .FirstOrDefaultAsync(m => m.Name
-                            .Equals(name, StringComparison.OrdinalIgnoreCase));
+                            .FirstOrDefaultAsync(m => m.Name == name);
 
                 if (entity == null) return false;
                 else return true;

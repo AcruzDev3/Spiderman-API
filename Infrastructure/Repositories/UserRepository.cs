@@ -44,7 +44,7 @@ namespace Infrastructure.Repositories
         public async Task<User?> GetByEmail(string email) {
             try {
                 UserEntity? entity = await this._context.Users
-                    .Where(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase))
+                    .Where(u => u.Email == email)  
                     .FirstOrDefaultAsync();
 
                 if (entity == null) return null;
@@ -58,7 +58,7 @@ namespace Infrastructure.Repositories
         public async Task<List<User>?> GetAllNeighbours() {
             try {
                 List<UserEntity> entities = await this._context.Users
-                                    .Where(u => u.Role.Name.Equals("NEIGHBOUR", StringComparison.OrdinalIgnoreCase))
+                                    .Where(u => u.Role.Name == "NEIGHBOUR")
                                     .ToListAsync();
                 if (entities == null || entities.Count == 0) return null;
                 List<User> users = new List<User>();
@@ -72,7 +72,7 @@ namespace Infrastructure.Repositories
         public async Task<List<User>?> GetAllHeroes() {
             try {
                 List<UserEntity> entities = await this._context.Users
-                                    .Where(u => u.Role.Name.Equals("HERO", StringComparison.OrdinalIgnoreCase))
+                                    .Where(u => u.Role.Name == "HERO")
                                     .ToListAsync();
                 if (entities == null || entities.Count == 0) return null;
                 List<User> users = new List<User>();
@@ -134,7 +134,7 @@ namespace Infrastructure.Repositories
             try {
                 UserEntity? entity = this._context.Users
                .AsNoTracking()
-               .FirstOrDefault(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+               .FirstOrDefault(u => u.Email == email);
                 if (entity == null) return false;
                 else return true;
             } catch (Exception ex) {

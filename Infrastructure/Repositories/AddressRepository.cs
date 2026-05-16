@@ -43,9 +43,9 @@ namespace Infrastructure.Repositories
         public async Task<bool> Exists(Address model) {
             try {
                 AddressEntity? entity = await this._context.Addresses
-                   .FirstOrDefaultAsync(m => m.Street.Equals(model.Street, StringComparison.OrdinalIgnoreCase) &&
-                   m.ZipCode.Equals(model.ZipCode, StringComparison.OrdinalIgnoreCase) &&
-                   m.Side.Equals(model.Side.ToString(), StringComparison.OrdinalIgnoreCase) &&
+                   .FirstOrDefaultAsync(m => m.Street == model.Street &&
+                   m.ZipCode == model.ZipCode &&
+                   m.Side == model.Side.ToString() &&
                    m.Number == model.Number
                 );
                 if (entity == null) return false;

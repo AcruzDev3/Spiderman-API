@@ -42,9 +42,9 @@ namespace Infrastructure.Repositories
         }
 
         public async Task<Role?> GetNeighbourRole() {
-            try {
+            try {   
                 RoleEntity? entity = await this._context.Roles
-                    .Where(r => r.Name.Equals("NEIGHBOUR", StringComparison.OrdinalIgnoreCase))
+                    .Where(r => r.Name == "NEIGHBOUR")
                     .FirstOrDefaultAsync();
 
                 if (entity == null) return null;
