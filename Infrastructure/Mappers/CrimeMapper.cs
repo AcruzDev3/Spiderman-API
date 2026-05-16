@@ -1,6 +1,6 @@
 ﻿using Application.Services;
 using Domain.Models;
-using Infrastructure.EF_Entities;
+using Infrastructure.Persistence.Entities;
 
 namespace Infrastructure.Mappers
 {
