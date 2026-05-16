@@ -15,12 +15,13 @@ namespace Infrastructure.Extensions
             services.AddScoped<ICriminalRepository, CriminalRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IAddressRepository, AddressRepository>();
-            services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
             services.AddScoped<IRoleRepository, RoleRepository>();
-            services.AddScoped<IAzureImageService, AzureImageService>();
             services.AddScoped<ICriminalRiskLevelRepository, CriminalRiskLevelRepository>();
-            services.AddScoped<IAuthService, AuthService>();
+
+            services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
+            services.AddScoped<IAzureImageService, AzureImageService>();
             services.AddScoped<IJwtService, JwtService>();
+
             return services;
         }
     }
