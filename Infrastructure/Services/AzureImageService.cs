@@ -2,6 +2,7 @@
 using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Infrastructure.Exceptions;
 using Microsoft.Extensions.Configuration;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Webp;
@@ -15,8 +16,10 @@ namespace Infrastructure.Services
         private readonly int _maxWidth;
         private readonly int _maxHeight;
         public AzureImageService(IConfiguration configuration) {
-            string connectionString = configuration.GetConnectionString("AzureStorage");
-            string containerName = configuration["AzureStorage:ContainerName"];
+            string connectionString = configuration.GetConnectionString("AzureStorage") ??
+                throw new InfrastructureException("La conexión con el Azure Storage no está configurada");
+            string containerName = configuration["AzureStorage:ContainerName"] ??
+                throw new InfrastructureException("El nombre del contenedor no está configurado");
 
             this._containerClient = new BlobContainerClient(connectionString, containerName);
             this._containerClient.CreateIfNotExists(PublicAccessType.Blob);
