@@ -45,8 +45,6 @@ namespace Application.Services
             string accessToken = this._jwtService.GenerateAccessToken(claims);
             DateTime expiration = this._jwtService.GetAccessTokenExpiration();
 
-
-
             LoginResponse response = new LoginResponse {
                 Token = accessToken,
                 Expiration = expiration
