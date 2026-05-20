@@ -17,8 +17,10 @@ namespace Infrastructure.Repositories
 
         public async Task<Criminal?> GetById(int id) {
             try {
-                CriminalEntity? entity = await this._context.Criminals.AsNoTracking()
-                                        .FirstOrDefaultAsync(c => c.CriminalId == id);
+                CriminalEntity? entity = await this._context.Criminals
+                    .AsNoTracking()
+                    .Include(c => c.Risk)
+                    .FirstOrDefaultAsync(c => c.CriminalId == id);
                 if (entity == null) return null;
                 else return await this.GetCriminalModel(entity);
             } catch (Exception ex) {
@@ -29,8 +31,10 @@ namespace Infrastructure.Repositories
         public async Task<List<Criminal>?> GetByIds(List<int> ids) {
             try {
                 List<CriminalEntity>? entities = await this._context.Criminals
-                .Where(c => ids.Contains(c.CriminalId))
-                .ToListAsync();
+                    .Where(c => ids.Contains(c.CriminalId))
+                    .Include(c => c.Risk)
+                    .AsNoTracking()
+                    .ToListAsync();
                 List<Criminal> criminals = new List<Criminal>();
 
                 foreach (CriminalEntity entity in entities) criminals.Add(await this.GetCriminalModel(entity));
@@ -43,8 +47,10 @@ namespace Infrastructure.Repositories
 
         public async Task<List<Criminal>?> GetAll() {
             try {
-                List<CriminalEntity> entites = await this._context.Criminals.AsNoTracking()
-                                            .ToListAsync();
+                List<CriminalEntity> entites = await this._context.Criminals
+                    .Include(c => c.Risk)
+                    .AsNoTracking()
+                    .ToListAsync();
                 List<Criminal> criminals = new List<Criminal>();
                 foreach (CriminalEntity entite in entites) criminals.Add(await this.GetCriminalModel(entite));
 
@@ -57,7 +63,7 @@ namespace Infrastructure.Repositories
         public async Task<bool> Exists(string name) {
             try { 
                 CriminalEntity? entity = await this._context.Criminals
-                            .FirstOrDefaultAsync(m => m.Name == name);
+                    .FirstOrDefaultAsync(m => m.Name == name);
 
                 if (entity == null) return false;
                 else return true;

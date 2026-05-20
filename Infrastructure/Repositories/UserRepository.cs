@@ -19,6 +19,7 @@ namespace Infrastructure.Repositories
             try {
                 UserEntity? entity = await this._context.Users
                 .AsNoTracking()
+                .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.UserId == id);
 
                 if (entity == null) return null;
@@ -33,6 +34,7 @@ namespace Infrastructure.Repositories
             try {
                 List<UserEntity> entities = await this._context.Users
                 .Where(u => ids.Contains(u.UserId))
+                .Include(u=> u.Role)
                 .ToListAsync();
                 List<User> users = new List<User>();
                 foreach (UserEntity entity in entities) users.Add(await this.GetUserModel(entity));
@@ -46,6 +48,7 @@ namespace Infrastructure.Repositories
             try {
                 UserEntity? entity = await this._context.Users
                     .Where(u => u.Email == email)  
+                    .Include(u => u.Role)
                     .FirstOrDefaultAsync();
 
                 if (entity == null) return null;
@@ -60,6 +63,7 @@ namespace Infrastructure.Repositories
             try {
                 List<UserEntity> entities = await this._context.Users
                                     .Where(u => u.Role.Name == "NEIGHBOUR")
+                                    .Include(u => u.Role)
                                     .ToListAsync();
                 if (entities == null || entities.Count == 0) return null;
                 List<User> users = new List<User>();
@@ -74,7 +78,8 @@ namespace Infrastructure.Repositories
             try {
                 List<UserEntity> entities = await this._context.Users
                                     .Where(u => u.Role.Name == "HERO")
-                                    .ToListAsync();
+                                    .Include(u => u.Role)
+                                    .ToListAsync(); 
                 if (entities == null || entities.Count == 0) return null;
                 List<User> users = new List<User>();
                 foreach (UserEntity entity in entities) users.Add(await this.GetUserModel(entity));
@@ -88,8 +93,14 @@ namespace Infrastructure.Repositories
             try {
                 List<CrimeEntity> crimesEntities = await _context.Crimes
                     .Where(c => c.Heroes.Any(u => u.UserId == model.Id))
+                    .Include(c => c.Grade)
+                    .Include(c => c.Type)
+                    .Include(c => c.Address)
+                    .Include(c => c.Criminals)
+                    .Include(c => c.Heroes)
                     .ToListAsync();
                 List<Crime> crimes = new List<Crime>();
+                foreach(CrimeEntity crimeEntity in crimesEntities) crimes.Add(await this.GetCrimeModel(crimeEntity));
                 return crimes;
             } catch (Exception ex) {
                 throw new InfrastructureException($"Error al obtener los crímenes del usuario con id {model.Id} de la base de datos: {ex.Message}");
@@ -150,6 +161,30 @@ namespace Infrastructure.Repositories
                 return UserMapper.ToDomain(entity, role);
             } catch(Exception ex) {
                 throw new InfrastructureException($"Error al mapear el usuario con id {entity.UserId} de la base de datos: {ex.Message}");
+            }
+        }
+
+        private async Task<Crime> GetCrimeModel(CrimeEntity entity) {
+            try {
+                CrimeGrade grade = CrimeGradeMapper.ToDomain(entity.Grade);
+                CrimeType type = CrimeTypeMapper.ToDomain(entity.Type);
+                Address address = AddressMapper.ToDomain(entity.Address);
+
+                List<User> users = new List<User>();
+                foreach (UserEntity userEntity in entity.Heroes) {
+                    Role role = RoleMapper.ToDomain(userEntity.Role);
+                    users.Add(UserMapper.ToDomain(userEntity, role));
+                }
+
+                List<Criminal> criminals = new List<Criminal>();
+                foreach (CriminalEntity criminalEntity in entity.Criminals) {
+                    CriminalRiskLevel risk = CriminalRiskLevelMapper.ToDomain(criminalEntity.Risk);
+                    criminals.Add(CriminalMapper.ToDomain(criminalEntity, risk));
+                }
+
+                return CrimeMapper.ToDomain(entity, users, criminals, address, grade, type);
+            } catch (Exception ex) {
+                throw new InfrastructureException($"Error al obtener el modelo del crimen de la base de datos: {ex.Message}");
             }
         }
     }

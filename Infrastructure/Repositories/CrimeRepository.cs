@@ -20,8 +20,15 @@ namespace Infrastructure.Repositories
         public async Task<Crime?> GetById(int id) {
             try {
                 CrimeEntity? entity = await this._context.Crimes
-                                        .AsNoTracking()
-                                        .FirstOrDefaultAsync(c => c.CrimeId == id);
+                    .AsNoTracking()
+                    .Include(c => c.Grade)
+                    .Include(c => c.Type)
+                    .Include(c => c.Address)
+                    .Include(c => c.Heroes)
+                        .ThenInclude(h => h.Role)
+                    .Include(c => c.Criminals)
+                        .ThenInclude(cr => cr.Risk)
+                    .FirstOrDefaultAsync(c => c.CrimeId == id);
 
                 if (entity == null) return null;
                 else return await this.GetCrimeModel(entity);
@@ -32,10 +39,19 @@ namespace Infrastructure.Repositories
 
         public async Task<List<Crime>?> GetAll() {
             try {
-                List<CrimeEntity> entites = await this._context.Crimes.AsNoTracking().ToListAsync();
+                List<CrimeEntity> entites = await this._context.Crimes
+                    .AsNoTracking()
+                    .Include(c => c.Grade)
+                    .Include(c => c.Type)
+                    .Include(c => c.Address)
+                    .Include(c => c.Heroes)
+                        .ThenInclude(h => h.Role)
+                    .Include(c => c.Criminals)
+                        .ThenInclude(cr => cr.Risk)
+                        .ToListAsync();
 
                 List<Crime> crimes = new List<Crime>();
-                foreach (CrimeEntity entity in entites) crimes.Add(await GetCrimeModel(entity));
+                foreach (CrimeEntity entity in entites) crimes.Add(await this.GetCrimeModel(entity));
 
                 return crimes;
             } catch (Exception ex) {
@@ -56,7 +72,6 @@ namespace Infrastructure.Repositories
             } catch (Exception ex) {
                 throw new InfrastructureException($"Error al verificar la existencia del crimen en la base de datos: {ex.Message}");
             }
-            
         }
 
         public async Task<CrimeGrade?> GetGradeByName(int gradeId) {
@@ -68,7 +83,6 @@ namespace Infrastructure.Repositories
             } catch(Exception ex) {
                 throw new InfrastructureException($"Error al obtener el grado de crimen con id {gradeId} de la base de datos: {ex.Message}");
             }
-            
         }
 
         public async Task<CrimeType?> GetTypeByName(int typeId) { 
