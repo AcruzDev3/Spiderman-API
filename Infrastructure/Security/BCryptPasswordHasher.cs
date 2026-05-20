@@ -11,7 +11,7 @@ namespace Infrastructure.Security
              return BCrypt.Net.BCrypt.HashPassword(password);
         }
         
-        public bool Verify(string hashedPassword, string providePasssword) {
+        public bool Verify(string providePasssword, string hashedPassword) {
             if (String.IsNullOrEmpty(hashedPassword) || String.IsNullOrEmpty(providePasssword))
                 return false;
 
