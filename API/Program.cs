@@ -56,8 +56,9 @@ public class Program
 
         builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
 
-        builder.Services.AddDbContext<SpidermanContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DB_SPIDERMAN")));
+        builder.Services.AddDbContext<SpidermanContext>(options => {
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DB_SPIDERMAN"));
+        });
 
         builder.Services.AddApplication();
         builder.Services.AddInfrastructure();
