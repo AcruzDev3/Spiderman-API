@@ -1,9 +1,9 @@
 ﻿using Application.Interfaces;
 using Application.Interfaces.IServices;
-using Application.Services;
 using Domain.Interfaces.IRepositories;
 using Infrastructure.Repositories;
 using Infrastructure.Security;
+using Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Extensions
@@ -18,9 +18,9 @@ namespace Infrastructure.Extensions
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<ICriminalRiskLevelRepository, CriminalRiskLevelRepository>();
 
-            services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
-            services.AddScoped<IAzureImageService, AzureImageService>();
-            services.AddScoped<IJwtService, JwtService>();
+            services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
+            services.AddSingleton<IAzureImageService, AzureImageService>();
+            services.AddSingleton<IJwtService, JwtService>();
 
             return services;
         }
