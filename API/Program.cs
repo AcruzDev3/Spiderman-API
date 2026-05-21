@@ -3,6 +3,8 @@ using API.Middlewares;
 using Application.Extensions;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Infrastructure.EF_Entities;
 using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,7 +14,7 @@ using System.Text.Json.Serialization;
 
 public class Program
 {
-    private static void Main(string[] args) {
+    private static async Task Main(string[] args) {
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddControllers()
@@ -65,6 +67,12 @@ public class Program
 
         var app = builder.Build();
 
+        BlobContainerClient blobClient = new BlobContainerClient(
+            builder.Configuration.GetConnectionString("AzureStorage"),
+            builder.Configuration["AzureStorage:ContainerName"]
+        );
+        await blobClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
+
         app.UseMiddleware<ExceptionMiddleware>();
 
         if (app.Environment.IsDevelopment()) {
@@ -86,6 +94,6 @@ public class Program
         app.UseHttpsRedirection();
         app.MapControllers();
 
-        app.Run();
+        await app.RunAsync();
     }
 }
