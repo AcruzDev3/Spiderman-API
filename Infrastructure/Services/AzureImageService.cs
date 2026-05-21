@@ -22,7 +22,6 @@ namespace Infrastructure.Services
                 throw new InfrastructureException("El nombre del contenedor no está configurado");
 
             this._containerClient = new BlobContainerClient(connectionString, containerName);
-            this._containerClient.CreateIfNotExists(PublicAccessType.Blob);
 
             this._maxWidth = 1080;
             this._maxHeight = 1080;
